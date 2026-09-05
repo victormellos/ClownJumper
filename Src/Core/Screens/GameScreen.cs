@@ -14,6 +14,8 @@ public class GameScreen : IScreen
     private readonly ContentManager _content;
     private readonly ScreenManager _screenManager;
     private readonly GameMode _mode;
+    private readonly InputSource _player1Source;
+    private readonly InputSource _player2Source;
 
     private SoundEffect _bounceSound;
     private SoundEffect _popSound;
@@ -39,12 +41,20 @@ public class GameScreen : IScreen
     private const int TrampolineWidth = 154;
     private const int TrampolineHeight = 58;
 
-    public GameScreen(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager, GameMode mode = GameMode.Solo)
+    public GameScreen(
+        GraphicsDevice graphicsDevice,
+        ContentManager content,
+        ScreenManager screenManager,
+        GameMode mode = GameMode.Solo,
+        InputSource player1Source = null,
+        InputSource player2Source = null)
     {
         _graphicsDevice = graphicsDevice;
         _content = content;
         _screenManager = screenManager;
         _mode = mode;
+        _player1Source = player1Source ?? InputSource.FromKeyboard(Keys.Left, Keys.Right);
+        _player2Source = player2Source ?? InputSource.FromKeyboard(Keys.A, Keys.D);
     }
 
     public void Initialize()
@@ -54,7 +64,7 @@ public class GameScreen : IScreen
         var clown1 = new Character(new Vector2(100f, 120f), Vector2.Zero);
         var trampoline1 = new Character(new Vector2(100f, 400f), Vector2.Zero);
 
-        var player1 = new Player(trampoline1, clown1, Keys.Left, Keys.Right, PlayerIndex.One)
+        var player1 = new Player(trampoline1, clown1, _player1Source)
         {
             TintColor = Color.Blue
         };
@@ -66,7 +76,7 @@ public class GameScreen : IScreen
             var clown2 = new Character(new Vector2(300f, 120f), Vector2.Zero);
             var trampoline2 = new Character(new Vector2(300f, 400f), Vector2.Zero);
 
-            var player2 = new Player(trampoline2, clown2, Keys.A, Keys.D, PlayerIndex.Two, "Jogador 2")
+            var player2 = new Player(trampoline2, clown2, _player2Source, "Jogador 2")
             {
                 TintColor = Color.Red
             };

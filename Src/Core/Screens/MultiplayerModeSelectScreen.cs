@@ -5,11 +5,19 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ClownJumper;
 
-public class MainMenu : IScreen
+/// <summary>
+/// Tela exibida depois que os 2 jogadores confirmaram entrada no
+/// multiplayer (PlayerJoinScreen). Aqui escolhem entre Coop e VS, e o
+/// GameScreen é criado já com as fontes de input de cada jogador.
+/// </summary>
+public class MultiplayerModeSelectScreen : IScreen
 {
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ContentManager _content;
     private readonly ScreenManager _screenManager;
+
+    private readonly InputSource _player1Source;
+    private readonly InputSource _player2Source;
 
     private SpriteFont _textFont;
     private SpriteBatch _spriteBatch;
@@ -17,11 +25,18 @@ public class MainMenu : IScreen
 
     private KeyboardState _previousKeyboard;
 
-    public MainMenu(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager)
+    public MultiplayerModeSelectScreen(
+        GraphicsDevice graphicsDevice,
+        ContentManager content,
+        ScreenManager screenManager,
+        InputSource player1Source,
+        InputSource player2Source)
     {
         _graphicsDevice = graphicsDevice;
         _content = content;
         _screenManager = screenManager;
+        _player1Source = player1Source;
+        _player2Source = player2Source;
     }
 
     public void Initialize()
@@ -39,14 +54,18 @@ public class MainMenu : IScreen
     {
         var keyboard = Keyboard.GetState();
 
-        bool startPressed =
-            IsKeyPressedThisFrame(keyboard, Keys.Enter) ||
-            IsKeyPressedThisFrame(keyboard, Keys.Space);
-            
-        if (startPressed)
+        bool coopPressed = IsKeyPressedThisFrame(keyboard, Keys.D1);
+        bool versusPressed = IsKeyPressedThisFrame(keyboard, Keys.D2);
+
+        if (coopPressed)
         {
             _screenManager.RequestScreenChange(
-                new ModeSelectScreen(_graphicsDevice, _content, _screenManager));
+                new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Coop, _player1Source, _player2Source));
+        }
+        else if (versusPressed)
+        {
+            _screenManager.RequestScreenChange(
+                new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Versus, _player1Source, _player2Source));
         }
 
         _previousKeyboard = keyboard;
@@ -70,11 +89,11 @@ public class MainMenu : IScreen
 
         _spriteBatch.DrawString(
             _textFont,
-            "JOGO LEGAL DO PALHACO FELIZ",
+            "ESCOLHA O MODO MULTIPLAYER",
             new Vector2(0, 0),
             Color.Black);
 
-        string texto = "Pressione ENTER ou ESPACO para jogar";
+        string texto = "1 - Coop        2 - Versus";
         Vector2 tamanho = _textFont.MeasureString(texto);
 
         float posX = (_graphicsDevice.Viewport.Width - tamanho.X) / 2;

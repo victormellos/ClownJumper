@@ -1,5 +1,4 @@
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 
 namespace ClownJumper;
 
@@ -43,8 +42,7 @@ public class Player
     /// </summary>
     public Delay RespawnTimer { get; } = new Delay(500.0);
 
-    private KeyboardState _keyboard;
-    private GamePadState _gamepad;
+    private readonly InputSource _inputSource;
 
     private bool _isAlive = true;
     public bool IsAlive
@@ -61,11 +59,7 @@ public class Player
         }
     }
 
-    private readonly Keys _leftKey;
-    private readonly Keys _rightKey;
-    private readonly PlayerIndex _playerIndex;
-
-    public Player(Character trampoline, Character clown, Keys left, Keys right, PlayerIndex playerIndex, string name = "Jogador", int lives = 5)
+    public Player(Character trampoline, Character clown, InputSource inputSource, string name = "Jogador", int lives = 5)
     {
         Trampoline = trampoline;
         Clown = clown;
@@ -75,16 +69,14 @@ public class Player
         Name = name;
         Lives = lives;
 
-        _leftKey = left;
-        _rightKey = right;
-
-        _playerIndex = playerIndex;
+        _inputSource = inputSource;
     }
 
     public void UpdateInput()
     {
-        _keyboard = Keyboard.GetState();
-        _gamepad = GamePad.GetState(_playerIndex);
+        // A leitura em si é feita sob demanda pelo InputSource (Keyboard.GetState()
+        // e GamePad.GetState() já são baratos de chamar a cada frame), então não
+        // há estado para cachear aqui além do que o InputSource já resolve.
     }
 
     public void HandleInput()
@@ -92,13 +84,13 @@ public class Player
         if (!IsAlive)
             return;
 
-        if (_keyboard.IsKeyDown(_leftKey))
+        if (_inputSource.IsLeftPressed())
             Trampoline.Position.X -= 10f;
 
-        if (_keyboard.IsKeyDown(_rightKey))
+        if (_inputSource.IsRightPressed())
             Trampoline.Position.X += 10f;
 
-        Trampoline.Position.X += _gamepad.ThumbSticks.Left.X * 15f;
+        Trampoline.Position.X += _inputSource.GetAnalogAxis() * 15f;
     }
 
     private void OnDeath()

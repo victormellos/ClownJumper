@@ -5,7 +5,12 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ClownJumper;
 
-public class MainMenu : IScreen
+/// <summary>
+/// Tela exibida depois do "OK" no menu principal, onde o jogador escolhe
+/// entre jogar Solo ou ir para o fluxo de Multiplayer (seleção de
+/// jogadores e depois Coop/VS).
+/// </summary>
+public class ModeSelectScreen : IScreen
 {
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ContentManager _content;
@@ -17,7 +22,7 @@ public class MainMenu : IScreen
 
     private KeyboardState _previousKeyboard;
 
-    public MainMenu(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager)
+    public ModeSelectScreen(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager)
     {
         _graphicsDevice = graphicsDevice;
         _content = content;
@@ -39,14 +44,18 @@ public class MainMenu : IScreen
     {
         var keyboard = Keyboard.GetState();
 
-        bool startPressed =
-            IsKeyPressedThisFrame(keyboard, Keys.Enter) ||
-            IsKeyPressedThisFrame(keyboard, Keys.Space);
-            
-        if (startPressed)
+        bool soloPressed = IsKeyPressedThisFrame(keyboard, Keys.D1);
+        bool multiplayerPressed = IsKeyPressedThisFrame(keyboard, Keys.D2);
+
+        if (soloPressed)
         {
             _screenManager.RequestScreenChange(
-                new ModeSelectScreen(_graphicsDevice, _content, _screenManager));
+                new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Solo));
+        }
+        else if (multiplayerPressed)
+        {
+            _screenManager.RequestScreenChange(
+                new PlayerJoinScreen(_graphicsDevice, _content, _screenManager));
         }
 
         _previousKeyboard = keyboard;
@@ -70,11 +79,11 @@ public class MainMenu : IScreen
 
         _spriteBatch.DrawString(
             _textFont,
-            "JOGO LEGAL DO PALHACO FELIZ",
+            "ESCOLHA O MODO",
             new Vector2(0, 0),
             Color.Black);
 
-        string texto = "Pressione ENTER ou ESPACO para jogar";
+        string texto = "1 - Solo        2 - Multiplayer";
         Vector2 tamanho = _textFont.MeasureString(texto);
 
         float posX = (_graphicsDevice.Viewport.Width - tamanho.X) / 2;
