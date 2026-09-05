@@ -6,11 +6,11 @@ using Microsoft.Xna.Framework.Input;
 namespace ClownJumper;
 
 /// <summary>
-/// Tela exibida depois do "OK" no menu principal, onde o jogador escolhe
-/// entre jogar Solo ou ir para o fluxo de Multiplayer (seleção de
-/// jogadores e depois Coop/VS).
+/// Tela exibida depois de escolher Solo no ModeSelectScreen, onde o
+/// jogador escolhe entre Normal (vidas limitadas) e Treinamento (vidas
+/// infinitas).
 /// </summary>
-public class ModeSelectScreen : IScreen
+public class SoloModeSelectScreen : IScreen
 {
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ContentManager _content;
@@ -22,7 +22,7 @@ public class ModeSelectScreen : IScreen
 
     private KeyboardState _previousKeyboard;
 
-    public ModeSelectScreen(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager)
+    public SoloModeSelectScreen(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager)
     {
         _graphicsDevice = graphicsDevice;
         _content = content;
@@ -44,18 +44,18 @@ public class ModeSelectScreen : IScreen
     {
         var keyboard = Keyboard.GetState();
 
-        bool soloPressed = IsKeyPressedThisFrame(keyboard, Keys.D1);
-        bool multiplayerPressed = IsKeyPressedThisFrame(keyboard, Keys.D2);
+        bool normalPressed = IsKeyPressedThisFrame(keyboard, Keys.D1);
+        bool trainingPressed = IsKeyPressedThisFrame(keyboard, Keys.D2);
 
-        if (soloPressed)
+        if (normalPressed)
         {
             _screenManager.RequestScreenChange(
-                new SoloModeSelectScreen(_graphicsDevice, _content, _screenManager));
+                new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Solo));
         }
-        else if (multiplayerPressed)
+        else if (trainingPressed)
         {
             _screenManager.RequestScreenChange(
-                new PlayerJoinScreen(_graphicsDevice, _content, _screenManager));
+                new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Training));
         }
 
         _previousKeyboard = keyboard;
@@ -79,11 +79,11 @@ public class ModeSelectScreen : IScreen
 
         _spriteBatch.DrawString(
             _textFont,
-            "ESCOLHA O MODO",
+            "ESCOLHA O MODO SOLO",
             new Vector2(0, 0),
             Color.Black);
 
-        string texto = "1 - Solo        2 - Multiplayer";
+        string texto = "1 - Normal        2 - Treinamento";
         Vector2 tamanho = _textFont.MeasureString(texto);
 
         float posX = (_graphicsDevice.Viewport.Width - tamanho.X) / 2;
