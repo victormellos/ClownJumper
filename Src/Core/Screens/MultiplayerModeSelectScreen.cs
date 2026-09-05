@@ -7,8 +7,9 @@ namespace ClownJumper;
 
 /// <summary>
 /// Tela exibida depois que os 2 jogadores confirmaram entrada no
-/// multiplayer (PlayerJoinScreen). Aqui escolhem entre Coop e VS, e o
-/// GameScreen é criado já com as fontes de input de cada jogador.
+/// multiplayer (PlayerJoinScreen). Aqui escolhem entre Coop, VS e
+/// Treinamento, e o GameScreen é criado já com as fontes de input de cada
+/// jogador.
 /// </summary>
 public class MultiplayerModeSelectScreen : IScreen
 {
