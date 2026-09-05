@@ -72,6 +72,18 @@ public class GameScreen : IScreen
             };
 
             _players.Add(player2);
+
+            if (_mode == GameMode.Coop)
+            {
+                // No Coop, vidas, pontos e combo são do time: os dois jogadores
+                // passam a compartilhar a mesma instância de Score e TeamState.
+                var sharedTeam = new TeamState(player1.Lives);
+                var sharedScore = player1.Score;
+
+                player1.Team = sharedTeam;
+                player2.Team = sharedTeam;
+                player2.Score = sharedScore;
+            }
         }
     }
 
@@ -178,6 +190,32 @@ public class GameScreen : IScreen
         foreach (var player in _players)
         {
             UpdatePlayer(player, gameTime);
+        }
+
+        if (_mode == GameMode.Coop)
+        {
+            CheckCoopGameOver();
+        }
+    }
+
+    /// <summary>
+    /// No Coop, as vidas são do time: assim que elas acabam, todos os
+    /// jogadores do time são derrubados juntos, mesmo que algum ainda
+    /// estivesse com o clown vivo no momento.
+    /// </summary>
+    private void CheckCoopGameOver()
+    {
+        bool teamOutOfLives = _players.Count > 0 && _players[0].Lives <= 0;
+
+        if (!teamOutOfLives)
+            return;
+
+        foreach (var player in _players)
+        {
+            if (player.IsAlive)
+            {
+                player.IsAlive = false;
+            }
         }
     }
 
