@@ -315,9 +315,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/victormellos/Documentos/ClownJumper/Src/VictorMellos.csproj",
-      "projectName": "VictorMellos",
-      "projectPath": "/home/victormellos/Documentos/ClownJumper/Src/VictorMellos.csproj",
+      "projectUniqueName": "/home/victormellos/Documentos/ClownJumper/Src/ClownJumper.csproj",
+      "projectName": "ClownJumper",
+      "projectPath": "/home/victormellos/Documentos/ClownJumper/Src/ClownJumper.csproj",
       "packagesPath": "/home/victormellos/.nuget/packages/",
       "outputPath": "/home/victormellos/Documentos/ClownJumper/Src/obj/",
       "projectStyle": "PackageReference",
