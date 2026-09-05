@@ -31,6 +31,14 @@ public class GameScreen : IScreen
     private Sprite _balloonSprite;
     private readonly List<Balloon> _balloons = new();
 
+    // Tamanho visual/hitbox que os personagens sempre tiveram (sprites antigos
+    // eram 58x64 e 154x58). Os sprites novos são desenhados em 32x32, então
+    // usamos esses valores como referência de escala, sem mudar a jogabilidade.
+    private const int ClownWidth = 58;
+    private const int ClownHeight = 64;
+    private const int TrampolineWidth = 154;
+    private const int TrampolineHeight = 58;
+
     public GameScreen(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager, GameMode mode = GameMode.Solo)
     {
         _graphicsDevice = graphicsDevice;
@@ -85,17 +93,27 @@ public class GameScreen : IScreen
         {
             player.Clown.Sprite = new Sprite
             {
-                Texture = _content.Load<Texture2D>("images/clown")
+                Texture = _content.Load<Texture2D>("images/clown_base"),
+                TintTexture = _content.Load<Texture2D>("images/clown_tint")
             };
-            player.Clown.Width = player.Clown.Sprite.Texture.Width;
-            player.Clown.Height = player.Clown.Sprite.Texture.Height;
+            player.Clown.Width = ClownWidth;
+            player.Clown.Height = ClownHeight;
+            player.Clown.Sprite.Scale = new Vector2(
+                (float)ClownWidth / player.Clown.Sprite.Texture.Width,
+                (float)ClownHeight / player.Clown.Sprite.Texture.Height
+            );
 
             player.Trampoline.Sprite = new Sprite
             {
-                Texture = _content.Load<Texture2D>("images/Trampoline")
+                Texture = _content.Load<Texture2D>("images/trampoline_base"),
+                TintTexture = _content.Load<Texture2D>("images/trampoline_tint")
             };
-            player.Trampoline.Width = player.Trampoline.Sprite.Texture.Width;
-            player.Trampoline.Height = player.Trampoline.Sprite.Texture.Height;
+            player.Trampoline.Width = TrampolineWidth;
+            player.Trampoline.Height = TrampolineHeight;
+            player.Trampoline.Sprite.Scale = new Vector2(
+                (float)TrampolineWidth / player.Trampoline.Sprite.Texture.Width,
+                (float)TrampolineHeight / player.Trampoline.Sprite.Texture.Height
+            );
 
             player.Trampoline.Position = new Vector2(
                 player.Trampoline.Position.X,
@@ -261,7 +279,7 @@ public class GameScreen : IScreen
         {
             if (player.Clown != null)
             {
-                _spriteBatch.Draw(player.Clown.Sprite.Texture, player.Clown.Position, player.TintColor);
+                player.Clown.Sprite.DrawTinted(_spriteBatch, player.Clown.Position, player.TintColor);
             }
 
             foreach (var balloon in _balloons)
@@ -273,7 +291,7 @@ public class GameScreen : IScreen
                 );
             }
 
-            _spriteBatch.Draw(player.Trampoline.Sprite.Texture, player.Trampoline.Position, player.TintColor);
+            player.Trampoline.Sprite.DrawTinted(_spriteBatch, player.Trampoline.Position, player.TintColor);
 
             string livesText = player.Lives <= 0 ? "Morto!" : $"Vidas: {player.Lives}";
             string comboText = player.Score.Combo <= 1 ? "" : $"\nCombo : {player.Score.Combo}";
