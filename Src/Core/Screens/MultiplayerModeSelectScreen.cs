@@ -18,6 +18,8 @@ public class MultiplayerModeSelectScreen : IScreen
 
     private readonly InputSource _player1Source;
     private readonly InputSource _player2Source;
+    private readonly Color _player1Color;
+    private readonly Color _player2Color;
 
     private SpriteFont _textFont;
     private SpriteBatch _spriteBatch;
@@ -30,13 +32,17 @@ public class MultiplayerModeSelectScreen : IScreen
         ContentManager content,
         ScreenManager screenManager,
         InputSource player1Source,
-        InputSource player2Source)
+        InputSource player2Source,
+        Color player1Color,
+        Color player2Color)
     {
         _graphicsDevice = graphicsDevice;
         _content = content;
         _screenManager = screenManager;
         _player1Source = player1Source;
         _player2Source = player2Source;
+        _player1Color = player1Color;
+        _player2Color = player2Color;
     }
 
     public void Initialize()
@@ -60,12 +66,12 @@ public class MultiplayerModeSelectScreen : IScreen
         if (coopPressed)
         {
             _screenManager.RequestScreenChange(
-                new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Coop, _player1Source, _player2Source));
+                new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Coop, _player1Source, _player2Source, _player1Color, _player2Color));
         }
         else if (versusPressed)
         {
             _screenManager.RequestScreenChange(
-                new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Versus, _player1Source, _player2Source));
+                new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Versus, _player1Source, _player2Source, _player1Color, _player2Color));
         }
 
         _previousKeyboard = keyboard;

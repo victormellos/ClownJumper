@@ -81,7 +81,7 @@ public class PlayerJoinScreen : IScreen
         if (_joinedSources.Count >= 2)
         {
             _screenManager.RequestScreenChange(
-                new MultiplayerModeSelectScreen(_graphicsDevice, _content, _screenManager, _joinedSources[0], _joinedSources[1]));
+                new ColorSelectScreen(_graphicsDevice, _content, _screenManager, _joinedSources[0], _joinedSources[1]));
         }
     }
 

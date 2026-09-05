@@ -16,6 +16,8 @@ public class GameScreen : IScreen
     private readonly GameMode _mode;
     private readonly InputSource _player1Source;
     private readonly InputSource _player2Source;
+    private readonly Color _player1Color;
+    private readonly Color _player2Color;
 
     private SoundEffect _bounceSound;
     private SoundEffect _popSound;
@@ -54,7 +56,9 @@ public class GameScreen : IScreen
         ScreenManager screenManager,
         GameMode mode = GameMode.Solo,
         InputSource player1Source = null,
-        InputSource player2Source = null)
+        InputSource player2Source = null,
+        Color? player1Color = null,
+        Color? player2Color = null)
     {
         _graphicsDevice = graphicsDevice;
         _content = content;
@@ -62,6 +66,8 @@ public class GameScreen : IScreen
         _mode = mode;
         _player1Source = player1Source ?? InputSource.FromKeyboard(Keys.Left, Keys.Right);
         _player2Source = player2Source ?? InputSource.FromKeyboard(Keys.A, Keys.D);
+        _player1Color = player1Color ?? Color.Blue;
+        _player2Color = player2Color ?? Color.Red;
     }
 
     public void Initialize()
@@ -73,7 +79,7 @@ public class GameScreen : IScreen
 
         var player1 = new Player(trampoline1, clown1, _player1Source)
         {
-            TintColor = Color.Blue
+            TintColor = _player1Color
         };
 
         _players.Add(player1);
@@ -85,7 +91,7 @@ public class GameScreen : IScreen
 
             var player2 = new Player(trampoline2, clown2, _player2Source, "Jogador 2")
             {
-                TintColor = Color.Red
+                TintColor = _player2Color
             };
 
             _players.Add(player2);
