@@ -41,6 +41,13 @@ public class GameScreen : IScreen
     private const int TrampolineWidth = 154;
     private const int TrampolineHeight = 58;
 
+    // Tamanho de exibição do coração de vida (o arquivo é 32x32, mas
+    // desenhamos menor para caber bem no HUD embaixo da tela).
+    private const int HeartSize = 20;
+    private const int HeartSpacing = 4;
+
+    private Sprite _heartSprite;
+
     public GameScreen(
         GraphicsDevice graphicsDevice,
         ContentManager content,
@@ -110,6 +117,16 @@ public class GameScreen : IScreen
         _popSound = _content.Load<SoundEffect>("sounds/pop");
 
         _textFont = _content.Load<SpriteFont>("fonts/ScoreFont");
+
+        _heartSprite = new Sprite
+        {
+            Texture = _content.Load<Texture2D>("images/heart_base"),
+            TintTexture = _content.Load<Texture2D>("images/heart_tint")
+        };
+        _heartSprite.Scale = new Vector2(
+            (float)HeartSize / _heartSprite.Texture.Width,
+            (float)HeartSize / _heartSprite.Texture.Height
+        );
 
         foreach (var player in _players)
         {
@@ -341,9 +358,8 @@ public class GameScreen : IScreen
 
             player.Trampoline.Sprite.DrawTinted(_spriteBatch, player.Trampoline.Position, player.TintColor);
 
-            string livesText = player.Lives <= 0 ? "Morto!" : $"Vidas: {player.Lives}";
             string comboText = player.Score.Combo <= 1 ? "" : $"\nCombo : {player.Score.Combo}";
-            string scoreText = $"{player.Name} : {player.Score.Points}\n{livesText}{comboText}";
+            string scoreText = $"{player.Name} : {player.Score.Points}{comboText}";
 
             _spriteBatch.DrawString(
                 _textFont,
@@ -355,6 +371,37 @@ public class GameScreen : IScreen
             offsetY += 30f;
         }
 
+        DrawLives();
+
         _spriteBatch.End();
+    }
+
+    /// <summary>
+    /// Desenha os corações de vida de cada jogador na parte de baixo da
+    /// tela (embaixo, para não ficar atrás dos balões como estava antes).
+    /// Jogador 1 fica alinhado à esquerda, jogador 2 à direita.
+    /// </summary>
+    private void DrawLives()
+    {
+        float heartsY = _graphicsDevice.Viewport.Height - HeartSize - 8;
+
+        for (int playerIndex = 0; playerIndex < _players.Count; playerIndex++)
+        {
+            var player = _players[playerIndex];
+            bool alignRight = playerIndex == 1;
+
+            for (int i = 0; i < player.Lives; i++)
+            {
+                float heartX = alignRight
+                    ? _graphicsDevice.Viewport.Width - HeartSize - 8 - (i * (HeartSize + HeartSpacing))
+                    : 8 + (i * (HeartSize + HeartSpacing));
+
+                _heartSprite.DrawTinted(
+                    _spriteBatch,
+                    new Vector2(heartX, heartsY),
+                    player.TintColor
+                );
+            }
+        }
     }
 }
