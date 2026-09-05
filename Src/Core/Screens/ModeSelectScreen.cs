@@ -46,6 +46,7 @@ public class ModeSelectScreen : IScreen
 
         bool soloPressed = IsKeyPressedThisFrame(keyboard, Keys.D1);
         bool multiplayerPressed = IsKeyPressedThisFrame(keyboard, Keys.D2);
+        bool trainingPressed = IsKeyPressedThisFrame(keyboard, Keys.D3);
 
         if (soloPressed)
         {
@@ -56,6 +57,11 @@ public class ModeSelectScreen : IScreen
         {
             _screenManager.RequestScreenChange(
                 new PlayerJoinScreen(_graphicsDevice, _content, _screenManager));
+        }
+        else if (trainingPressed)
+        {
+            _screenManager.RequestScreenChange(
+                new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Training));
         }
 
         _previousKeyboard = keyboard;
@@ -83,7 +89,7 @@ public class ModeSelectScreen : IScreen
             new Vector2(0, 0),
             Color.Black);
 
-        string texto = "1 - Solo        2 - Multiplayer";
+        string texto = "1 - Solo        2 - Multiplayer        3 - Treinamento";
         Vector2 tamanho = _textFont.MeasureString(texto);
 
         float posX = (_graphicsDevice.Viewport.Width - tamanho.X) / 2;

@@ -96,7 +96,7 @@ public class GameScreen : IScreen
 
             _players.Add(player2);
 
-            if (_mode == GameMode.Coop)
+            if (_mode == GameMode.Coop || _mode == GameMode.TrainingCoop)
             {
                 // No Coop, vidas, pontos e combo são do time: os dois jogadores
                 // passam a compartilhar a mesma instância de Score e TeamState.
@@ -225,11 +225,17 @@ public class GameScreen : IScreen
             UpdatePlayer(player, gameTime);
         }
 
-        if (_mode == GameMode.Coop)
+        if (_mode == GameMode.Coop || _mode == GameMode.TrainingCoop)
         {
             CheckCoopGameOver();
         }
     }
+
+    /// <summary>
+    /// Treinamento (solo ou coop) tem vidas infinitas: o jogador/time nunca
+    /// recebe "game over", só perde pontos e combo ao cair.
+    /// </summary>
+    private bool IsTrainingMode => _mode == GameMode.Training || _mode == GameMode.TrainingCoop;
 
     /// <summary>
     /// No Coop, as vidas são do time: assim que elas acabam, todos os
@@ -281,8 +287,12 @@ public class GameScreen : IScreen
         if (clown.Position.Y > (maxY + clown.Height))
         {
             player.Score.AddPoints(-1200);
-            player.Lives--;
             player.Score.ResetCombo();
+
+            if (!IsTrainingMode)
+            {
+                player.Lives--;
+            }
 
             player.RespawnTimer.Wait(gameTime, () =>
             {
@@ -290,7 +300,7 @@ public class GameScreen : IScreen
                 clown.Velocity = Vector2.Zero;
             });
 
-            if (player.Lives <= 0)
+            if (!IsTrainingMode && player.Lives <= 0)
             {
                 player.IsAlive = false;
             }

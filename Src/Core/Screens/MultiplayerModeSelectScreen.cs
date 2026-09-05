@@ -62,6 +62,7 @@ public class MultiplayerModeSelectScreen : IScreen
 
         bool coopPressed = IsKeyPressedThisFrame(keyboard, Keys.D1);
         bool versusPressed = IsKeyPressedThisFrame(keyboard, Keys.D2);
+        bool trainingPressed = IsKeyPressedThisFrame(keyboard, Keys.D3);
 
         if (coopPressed)
         {
@@ -72,6 +73,11 @@ public class MultiplayerModeSelectScreen : IScreen
         {
             _screenManager.RequestScreenChange(
                 new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Versus, _player1Source, _player2Source, _player1Color, _player2Color));
+        }
+        else if (trainingPressed)
+        {
+            _screenManager.RequestScreenChange(
+                new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.TrainingCoop, _player1Source, _player2Source, _player1Color, _player2Color));
         }
 
         _previousKeyboard = keyboard;
@@ -99,7 +105,7 @@ public class MultiplayerModeSelectScreen : IScreen
             new Vector2(0, 0),
             Color.Black);
 
-        string texto = "1 - Coop        2 - Versus";
+        string texto = "1 - Coop        2 - Versus        3 - Treinamento";
         Vector2 tamanho = _textFont.MeasureString(texto);
 
         float posX = (_graphicsDevice.Viewport.Width - tamanho.X) / 2;
