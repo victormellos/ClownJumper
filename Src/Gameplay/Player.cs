@@ -14,6 +14,12 @@ public class Player
     public int Lives;
 
     /// <summary>
+    /// Cor usada para tingir o sprite do palhaço (que tem partes brancas
+    /// justamente para isso). Jogador 1 = azul, Jogador 2 = vermelho.
+    /// </summary>
+    public Color TintColor = Color.White;
+
+    /// <summary>
     /// Temporizador de respawn deste jogador. Cada jogador tem o seu,
     /// para respawns não interferirem entre jogadores diferentes.
     /// </summary>

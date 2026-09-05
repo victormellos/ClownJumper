@@ -13,6 +13,7 @@ public class GameScreen : IScreen
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ContentManager _content;
     private readonly ScreenManager _screenManager;
+    private readonly GameMode _mode;
 
     private SoundEffect _bounceSound;
     private SoundEffect _popSound;
@@ -30,11 +31,12 @@ public class GameScreen : IScreen
     private Sprite _balloonSprite;
     private readonly List<Balloon> _balloons = new();
 
-    public GameScreen(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager)
+    public GameScreen(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager, GameMode mode = GameMode.Solo)
     {
         _graphicsDevice = graphicsDevice;
         _content = content;
         _screenManager = screenManager;
+        _mode = mode;
     }
 
     public void Initialize()
@@ -44,7 +46,25 @@ public class GameScreen : IScreen
         var clown1 = new Character(new Vector2(100f, 120f), Vector2.Zero);
         var trampoline1 = new Character(new Vector2(100f, 400f), Vector2.Zero);
 
-        _players.Add(new Player(trampoline1, clown1, Keys.Left, Keys.Right, PlayerIndex.One));
+        var player1 = new Player(trampoline1, clown1, Keys.Left, Keys.Right, PlayerIndex.One)
+        {
+            TintColor = Color.Blue
+        };
+
+        _players.Add(player1);
+
+        if (_mode != GameMode.Solo)
+        {
+            var clown2 = new Character(new Vector2(300f, 120f), Vector2.Zero);
+            var trampoline2 = new Character(new Vector2(300f, 400f), Vector2.Zero);
+
+            var player2 = new Player(trampoline2, clown2, Keys.A, Keys.D, PlayerIndex.Two, "Jogador 2")
+            {
+                TintColor = Color.Red
+            };
+
+            _players.Add(player2);
+        }
     }
 
     public void LoadContent()
@@ -241,7 +261,7 @@ public class GameScreen : IScreen
         {
             if (player.Clown != null)
             {
-                _spriteBatch.Draw(player.Clown.Sprite.Texture, player.Clown.Position, Color.White);
+                _spriteBatch.Draw(player.Clown.Sprite.Texture, player.Clown.Position, player.TintColor);
             }
 
             foreach (var balloon in _balloons)
@@ -253,7 +273,7 @@ public class GameScreen : IScreen
                 );
             }
 
-            _spriteBatch.Draw(player.Trampoline.Sprite.Texture, player.Trampoline.Position, Color.White);
+            _spriteBatch.Draw(player.Trampoline.Sprite.Texture, player.Trampoline.Position, player.TintColor);
 
             string livesText = player.Lives <= 0 ? "Morto!" : $"Vidas: {player.Lives}";
             string comboText = player.Score.Combo <= 1 ? "" : $"\nCombo : {player.Score.Combo}";
