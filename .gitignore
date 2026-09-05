@@ -1,0 +1,15 @@
+## .NET / Visual Studio / Rider
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+
+## MonoGame Content Pipeline (arquivos compilados, gerados a partir do Content.mgcb)
+Src/Content/bin/
+Src/Content/obj/
+
+## Ferramentas / SO
+.DS_Store
+Thumbs.db

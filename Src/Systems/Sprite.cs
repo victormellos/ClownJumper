@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace VictorMellos;
+namespace ClownJumper;
 
 public class Sprite
 {

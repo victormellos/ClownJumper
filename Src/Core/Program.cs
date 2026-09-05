@@ -1,2 +1,2 @@
-﻿using var game = new VictorMellos.ClownGame();
+﻿using var game = new ClownJumper.ClownGame();
 game.Run();

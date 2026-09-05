@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-namespace VictorMellos;
+namespace ClownJumper;
 
 public class ClownGame : Game
 {

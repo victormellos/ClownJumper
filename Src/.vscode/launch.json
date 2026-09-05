@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "C#: VictorMellos Debug",
+        "name": "C#: ClownJumper Debug",
         "type": "dotnet",
         "request": "launch",
-        "projectPath": "${workspaceFolder}/VictorMellos.csproj"
+        "projectPath": "${workspaceFolder}/ClownJumper.csproj"
       }
     ],
   }

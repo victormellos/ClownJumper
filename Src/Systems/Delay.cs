@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace VictorMellos;
+namespace ClownJumper;
 
 /// <summary>
 /// Temporizador simples de "não repetir uma ação antes de X ms".

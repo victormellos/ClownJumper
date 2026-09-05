@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace VictorMellos;
+namespace ClownJumper;
 public class Level
 {
     // "Diff" = difficulty: quantidade de linhas de balões geradas para o nível.

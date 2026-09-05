@@ -1,6 +1,4 @@
-using System.IO.Compression;
-
-namespace VictorMellos;
+namespace ClownJumper;
 public class Score
 {
     public int Points { get; private set; }

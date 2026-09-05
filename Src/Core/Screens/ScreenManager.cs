@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-namespace VictorMellos;
+namespace ClownJumper;
 
 /// <summary>
 /// Controla qual tela está ativa e faz a transição entre elas.

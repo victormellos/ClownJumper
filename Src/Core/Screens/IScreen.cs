@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-namespace VictorMellos;
+namespace ClownJumper;
 
 /// <summary>
 /// Contrato comum para qualquer tela do jogo (menu, gameplay, etc.).
