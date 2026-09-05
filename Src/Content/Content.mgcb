@@ -74,18 +74,6 @@
 /processorParam:Quality=Best
 /build:sounds/bounce.wav
 
-#begin sounds/bounce.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:sounds/bounce.wav
-
-#begin sounds/pop.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:sounds/pop.wav
-
 #begin sounds/pop.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

@@ -21,10 +21,10 @@ public class ClownGame : Game
 
     protected override void Initialize()
     {
+        base.Initialize();
+
         _screenManager.RequestScreenChange(
             new MainMenu(GraphicsDevice, Content, _screenManager));
-
-        base.Initialize();
     }
 
     protected override void Update(GameTime gameTime)

@@ -41,3 +41,4 @@
 /home/victormellos/Documentos/ClownJumper/Src/obj/Debug/net9.0/VictorMellos.pdb
 /home/victormellos/Documentos/ClownJumper/Src/obj/Debug/net9.0/VictorMellos.genruntimeconfig.cache
 /home/victormellos/Documentos/ClownJumper/Src/obj/Debug/net9.0/ref/VictorMellos.dll
+/home/victormellos/Documentos/ClownJumper/Src/obj/Debug/net9.0/VictorMellos.sourcelink.json
