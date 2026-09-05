@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SourceFileCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Profile>Reach</Profile>
+  <Platform>DesktopGL</Platform>
+  <Config />
+  <SourceFiles>
+    <File>/home/victormellos/Documentos/ClownJumper/Src/Content/background.jpg</File>
+    <File>/home/victormellos/Documentos/ClownJumper/Src/Content/fonts/ScoreFont.spritefont</File>
+    <File>/home/victormellos/Documentos/ClownJumper/Src/Content/images/balloon.png</File>
+    <File>/home/victormellos/Documentos/ClownJumper/Src/Content/images/clown.png</File>
+    <File>/home/victormellos/Documentos/ClownJumper/Src/Content/images/Trampoline.png</File>
+    <File>/home/victormellos/Documentos/ClownJumper/Src/Content/sounds/bounce.wav</File>
+    <File>/home/victormellos/Documentos/ClownJumper/Src/Content/sounds/pop.wav</File>
+  </SourceFiles>
+  <DestFiles>
+    <File>images/background</File>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+  </DestFiles>
+</SourceFileCollection>

@@ -1,0 +1,8 @@
+Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
+"/home/victormellos/Documentos/ClownJumper/Src/Content/background.jpg","/home/victormellos/Documentos/ClownJumper/Src/Content/bin/DesktopGL/images/background.xnb","TextureProcessor","Texture2DContent",3182801,100000085,2,405851
+"/home/victormellos/Documentos/ClownJumper/Src/Content/fonts/ScoreFont.spritefont","/home/victormellos/Documentos/ClownJumper/Src/Content/bin/DesktopGL/fonts/ScoreFont.xnb","FontDescriptionProcessor","SpriteFontContent",2008,21530,0,0699718
+"/home/victormellos/Documentos/ClownJumper/Src/Content/images/balloon.png","/home/victormellos/Documentos/ClownJumper/Src/Content/bin/DesktopGL/images/balloon.xnb","TextureProcessor","Texture2DContent",105087,999449,0,0472954
+"/home/victormellos/Documentos/ClownJumper/Src/Content/images/clown.png","/home/victormellos/Documentos/ClownJumper/Src/Content/bin/DesktopGL/images/clown.xnb","TextureProcessor","Texture2DContent",1701,14933,0,0012237
+"/home/victormellos/Documentos/ClownJumper/Src/Content/images/Trampoline.png","/home/victormellos/Documentos/ClownJumper/Src/Content/bin/DesktopGL/images/Trampoline.xnb","TextureProcessor","Texture2DContent",1620,35813,0,0029025
+"/home/victormellos/Documentos/ClownJumper/Src/Content/sounds/bounce.wav","/home/victormellos/Documentos/ClownJumper/Src/Content/bin/DesktopGL/sounds/bounce.xnb","SoundEffectProcessor","SoundEffectContent",11160,11221,0,0322376
+"/home/victormellos/Documentos/ClownJumper/Src/Content/sounds/pop.wav","/home/victormellos/Documentos/ClownJumper/Src/Content/bin/DesktopGL/sounds/pop.xnb","SoundEffectProcessor","SoundEffectContent",138318,138345,0,0551551
