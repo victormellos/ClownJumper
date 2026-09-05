@@ -11,7 +11,25 @@ public class Player
     public Score Score;
 
     public string Name;
-    public int Lives;
+
+    /// <summary>
+    /// Time compartilhado deste jogador (usado no modo Coop). Quando presente,
+    /// as vidas passam a ser lidas/escritas do time em vez de um valor próprio.
+    /// </summary>
+    public TeamState Team;
+
+    private int _lives;
+    public int Lives
+    {
+        get => Team != null ? Team.Lives : _lives;
+        set
+        {
+            if (Team != null)
+                Team.Lives = value;
+            else
+                _lives = value;
+        }
+    }
 
     /// <summary>
     /// Cor usada para tingir o sprite do palhaço (que tem partes brancas
