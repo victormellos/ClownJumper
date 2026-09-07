@@ -27,7 +27,7 @@ public class GameScreen : IScreen
 
     private List<Player> _players;
 
-    private Level _level = new(1);
+    private Level _level = new();
     private int _levelNumber;
 
     private readonly Random _random = new();
