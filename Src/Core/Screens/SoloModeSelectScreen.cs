@@ -38,6 +38,8 @@ public class SoloModeSelectScreen : IScreen
         _spriteBatch = new SpriteBatch(_graphicsDevice);
         _textFont = _content.Load<SpriteFont>("fonts/ScoreFont");
         _background = _content.Load<Texture2D>("images/background");
+
+        _previousKeyboard = Keyboard.GetState();
     }
 
     public void Update(GameTime gameTime)
