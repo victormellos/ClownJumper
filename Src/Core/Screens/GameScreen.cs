@@ -217,10 +217,30 @@ public class GameScreen : IScreen
                     Sprite = _balloonSprite,
                     Width = balloonSize,
                     Height = balloonSize,
-                    TintColor = type.TintColor
+                    TintColor = type.TintColor,
+                    TimeToLive = type.TimeToLive
                 };
 
                 _balloons.Add(balloon);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Envelhece cada balão na tela e remove (sem pontuar nem penalizar) os
+    /// que ultrapassaram seu tempo de vida. Vermelho tem TimeToLive nulo e
+    /// nunca expira por aqui.
+    /// </summary>
+    private void UpdateBalloonLifetimes(GameTime gameTime)
+    {
+        for (int i = _balloons.Count - 1; i >= 0; i--)
+        {
+            var balloon = _balloons[i];
+            balloon.UpdateLifetime(gameTime);
+
+            if (balloon.IsExpired)
+            {
+                _balloons.RemoveAt(i);
             }
         }
     }
@@ -238,9 +258,15 @@ public class GameScreen : IScreen
         if (_balloons.Count == 0)
         {
             _levelNumber++;
-            _level = new Level(_levelNumber);
-            CreateBalloons(_level.Diff);
+            _level = new Level();
+            // TODO(Etapa 3/4): CreateBalloons(quantity) em grid será substituído
+            // pelo spawn contínuo em posição aleatória guiado por _level.SpawnInterval.
+            // Usamos _levelNumber como ponte temporária só pra manter a build íntegra
+            // entre etapas.
+            CreateBalloons(_levelNumber);
         }
+
+        UpdateBalloonLifetimes(gameTime);
 
         foreach (var player in _players)
         {
