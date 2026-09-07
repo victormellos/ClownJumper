@@ -49,6 +49,7 @@ public class GameScreen : IScreen
     private const int HeartSpacing = 4;
 
     private Sprite _heartSprite;
+    private Sprite _infinitySprite;
 
     public GameScreen(
         GraphicsDevice graphicsDevice,
@@ -133,6 +134,18 @@ public class GameScreen : IScreen
             (float)HeartSize / _heartSprite.Texture.Width,
             (float)HeartSize / _heartSprite.Texture.Height
         );
+        if (IsTrainingMode)
+            {
+                _infinitySprite = new Sprite
+                {
+                    Texture = _content.Load<Texture2D>("images/inf_base"),
+                    TintTexture = _content.Load<Texture2D>("images/inf_tint")
+                };
+                _infinitySprite.Scale = new Vector2(
+                    (float)HeartSize / _infinitySprite.Texture.Width,
+                    (float)HeartSize / _infinitySprite.Texture.Height
+                );
+            }
 
         foreach (var player in _players)
         {
@@ -405,6 +418,21 @@ public class GameScreen : IScreen
         {
             var player = _players[playerIndex];
             bool alignRight = playerIndex == 1;
+
+            if (IsTrainingMode)
+            {
+                float infinityX = alignRight
+                    ? _graphicsDevice.Viewport.Width - HeartSize - 8
+                    : 8;
+
+                _infinitySprite.DrawTinted(
+                    _spriteBatch,
+                    new Vector2(infinityX, heartsY),
+                    player.TintColor
+                );
+
+                continue;
+            }
 
             for (int i = 0; i < player.Lives; i++)
             {
