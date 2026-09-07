@@ -20,7 +20,7 @@ public class PlayerJoinScreen : IScreen
 
     private SpriteFont _textFont;
     private SpriteBatch _spriteBatch;
-    private Texture2D _background;
+    private RotatingBackground _background;
 
     // As 4 fontes possíveis de input, na ordem em que aparecem na tela.
     private InputSource[] _candidateSources;
@@ -60,11 +60,13 @@ public class PlayerJoinScreen : IScreen
     {
         _spriteBatch = new SpriteBatch(_graphicsDevice);
         _textFont = _content.Load<SpriteFont>("fonts/ScoreFont");
-        _background = _content.Load<Texture2D>("images/background");
+        _background = new RotatingBackground(_content);
     }
 
     public void Update(GameTime gameTime)
     {
+        _background.Update(gameTime);
+
         for (int i = 0; i < _candidateSources.Length; i++)
         {
             var source = _candidateSources[i];
@@ -91,10 +93,7 @@ public class PlayerJoinScreen : IScreen
 
         _spriteBatch.Begin();
 
-        _spriteBatch.Draw(
-            _background,
-            new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height),
-            Color.White);
+        _background.Draw(_spriteBatch, _graphicsDevice);
 
         _spriteBatch.DrawString(
             _textFont,

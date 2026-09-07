@@ -18,7 +18,7 @@ public class SoloModeSelectScreen : IScreen
 
     private SpriteFont _textFont;
     private SpriteBatch _spriteBatch;
-    private Texture2D _background;
+    private RotatingBackground _background;
 
     private KeyboardState _previousKeyboard;
 
@@ -37,13 +37,15 @@ public class SoloModeSelectScreen : IScreen
     {
         _spriteBatch = new SpriteBatch(_graphicsDevice);
         _textFont = _content.Load<SpriteFont>("fonts/ScoreFont");
-        _background = _content.Load<Texture2D>("images/background");
+        _background = new RotatingBackground(_content);
 
         _previousKeyboard = Keyboard.GetState();
     }
 
     public void Update(GameTime gameTime)
     {
+        _background.Update(gameTime);
+
         var keyboard = Keyboard.GetState();
 
         bool normalPressed = IsKeyPressedThisFrame(keyboard, Keys.D1);
@@ -74,10 +76,7 @@ public class SoloModeSelectScreen : IScreen
 
         _spriteBatch.Begin();
 
-        _spriteBatch.Draw(
-            _background,
-            new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height),
-            Color.White);
+        _background.Draw(_spriteBatch, _graphicsDevice);
 
         _spriteBatch.DrawString(
             _textFont,
