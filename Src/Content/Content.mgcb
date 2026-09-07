@@ -188,6 +188,24 @@
 /processorParam:Quality=Best
 /build:sounds/death3.wav
 
+#begin sounds/game_over1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/game_over1.wav
+
+#begin sounds/game_over2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/game_over2.wav
+
+#begin sounds/game_over3.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/game_over3.wav
+
 #begin sounds/pop.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

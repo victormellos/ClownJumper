@@ -22,7 +22,7 @@ public class GameScreen : IScreen
     private SoundEffect _bounceSound;
     private SoundEffect _popSound;
 
-    private SoundEffect _gameOverSound;
+    private SoundEffect[] _gameOverSounds;
     private SoundEffect[] _deathSounds;
 
     private SpriteFont _textFont;
@@ -131,6 +131,12 @@ public class GameScreen : IScreen
             _content.Load<SoundEffect>("sounds/death1"),
             _content.Load<SoundEffect>("sounds/death2"),
             _content.Load<SoundEffect>("sounds/death3")
+        ];
+        _gameOverSounds =
+        [
+            _content.Load<SoundEffect>("sounds/game_over1"),
+            _content.Load<SoundEffect>("sounds/game_over2"),
+            _content.Load<SoundEffect>("sounds/game_over3")
         ];
         _textFont = _content.Load<SpriteFont>("fonts/ScoreFont");
 
@@ -361,6 +367,7 @@ public class GameScreen : IScreen
             if (!IsTrainingMode && player.Lives <= 0)
             {
                 player.IsAlive = false;
+                _gameOverSounds[_random.Next(_gameOverSounds.Length)].Play();
             }
 
             return;
