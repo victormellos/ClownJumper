@@ -170,6 +170,24 @@
 /processorParam:Quality=Best
 /build:sounds/bounce.wav
 
+#begin sounds/death1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/death1.wav
+
+#begin sounds/death2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/death2.wav
+
+#begin sounds/death3.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/death3.wav
+
 #begin sounds/pop.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

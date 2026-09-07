@@ -22,6 +22,9 @@ public class GameScreen : IScreen
     private SoundEffect _bounceSound;
     private SoundEffect _popSound;
 
+    private SoundEffect _gameOverSound;
+    private SoundEffect[] _deathSounds;
+
     private SpriteFont _textFont;
     private SpriteBatch _spriteBatch;
 
@@ -123,7 +126,12 @@ public class GameScreen : IScreen
 
         _bounceSound = _content.Load<SoundEffect>("sounds/bounce");
         _popSound = _content.Load<SoundEffect>("sounds/pop");
-
+        _deathSounds =
+        [
+            _content.Load<SoundEffect>("sounds/death1"),
+            _content.Load<SoundEffect>("sounds/death2"),
+            _content.Load<SoundEffect>("sounds/death3")
+        ];
         _textFont = _content.Load<SpriteFont>("fonts/ScoreFont");
 
         _heartSprite = new Sprite
@@ -340,6 +348,8 @@ public class GameScreen : IScreen
             if (!IsTrainingMode)
             {
                 player.Lives--;
+                _deathSounds[_random.Next(_deathSounds.Length)].Play();
+
             }
 
             player.RespawnTimer.Wait(gameTime, () =>
