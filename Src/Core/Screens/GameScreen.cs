@@ -85,7 +85,7 @@ public class GameScreen : IScreen
 
         _players.Add(player1);
 
-        if (_mode != GameMode.Solo)
+        if (_mode == GameMode.Coop || _mode == GameMode.Versus || _mode == GameMode.TrainingCoop)
         {
             var clown2 = new Character(new Vector2(300f, 120f), Vector2.Zero);
             var trampoline2 = new Character(new Vector2(300f, 400f), Vector2.Zero);
