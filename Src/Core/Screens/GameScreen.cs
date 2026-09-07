@@ -117,7 +117,8 @@ public class GameScreen : IScreen
 
         _balloonSprite = new Sprite
         {
-            Texture = _content.Load<Texture2D>("images/balloon")
+            Texture = _content.Load<Texture2D>("images/balloon_base"),
+            TintTexture = _content.Load<Texture2D>("images/balloon_tint")
         };
 
         _bounceSound = _content.Load<SoundEffect>("sounds/bounce");
@@ -193,6 +194,11 @@ public class GameScreen : IScreen
         balloonSize = Math.Clamp(balloonSize, 16, 48);
 
         int columns = (_graphicsDevice.Viewport.Width + spacingX) / (balloonSize + spacingX);
+
+        _balloonSprite.Scale = new Vector2(
+            (float)balloonSize / _balloonSprite.Texture.Width,
+            (float)balloonSize / _balloonSprite.Texture.Height
+        );
 
         for (int y = 0; y < rows; y++)
         {
@@ -378,11 +384,7 @@ public class GameScreen : IScreen
 
             foreach (var balloon in _balloons)
             {
-                _spriteBatch.Draw(
-                    balloon.Sprite.Texture,
-                    new Rectangle((int)balloon.Position.X, (int)balloon.Position.Y, balloon.Width, balloon.Height),
-                    Color.White
-                );
+                balloon.Sprite.DrawTinted(_spriteBatch, balloon.Position, balloon.TintColor);
             }
 
             player.Trampoline.Sprite.DrawTinted(_spriteBatch, player.Trampoline.Position, player.TintColor);

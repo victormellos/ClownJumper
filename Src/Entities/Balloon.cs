@@ -6,6 +6,8 @@ namespace ClownJumper
     {
         public int Value;
 
+        public Color TintColor = Color.White;
+
         public override int Width { get; set; } = 64;
         public override int Height { get; set; } = 64;
 
