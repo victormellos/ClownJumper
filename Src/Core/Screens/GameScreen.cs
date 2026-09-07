@@ -204,17 +204,20 @@ public class GameScreen : IScreen
         {
             for (int x = 0; x < columns; x++)
             {
+                var type = Balloon.RollType(_random);
+
                 var balloon = new Balloon(
                     new Vector2(
                         x * (balloonSize + spacingX),
                         y * (balloonSize + spacingY)
                     ),
-                    _random.Next(200, 1001)
+                    type.Value
                 )
                 {
                     Sprite = _balloonSprite,
                     Width = balloonSize,
-                    Height = balloonSize
+                    Height = balloonSize,
+                    TintColor = type.TintColor
                 };
 
                 _balloons.Add(balloon);
