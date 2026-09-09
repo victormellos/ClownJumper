@@ -6,15 +6,24 @@ using Microsoft.Xna.Framework.Input;
 namespace ClownJumper;
 
 /// <summary>
-/// Tela exibida depois do "OK" no menu principal, onde o jogador escolhe
-/// entre jogar Solo ou ir para o fluxo de Multiplayer (seleção de
-/// jogadores e depois Coop/VS).
+/// Tela genérica de "escolha entre opções por texto": mostra um título no
+/// topo e uma linha de opções embaixo (ex.: "1 - Normal        2 -
+/// Treinamento"), cada uma associada a uma tecla. Ao pressionar a tecla de
+/// uma opção, troca para a tela retornada por ChoiceOption.CreateScreen.
+///
+/// Substitui o que antes eram telas separadas e praticamente idênticas
+/// (ModeSelectScreen, SoloModeSelectScreen, MultiplayerModeSelectScreen):
+/// a única diferença real entre elas era o título e as opções, então agora
+/// isso é passado como dado no construtor em vez de duplicar a classe.
 /// </summary>
-public class ModeSelectScreen : IScreen
+public class ChoiceScreen : IScreen
 {
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ContentManager _content;
     private readonly ScreenManager _screenManager;
+
+    private readonly string _title;
+    private readonly ChoiceOption[] _options;
 
     private SpriteFont _textFont;
     private SpriteBatch _spriteBatch;
@@ -22,11 +31,18 @@ public class ModeSelectScreen : IScreen
 
     private KeyboardState _previousKeyboard;
 
-    public ModeSelectScreen(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager)
+    public ChoiceScreen(
+        GraphicsDevice graphicsDevice,
+        ContentManager content,
+        ScreenManager screenManager,
+        string title,
+        ChoiceOption[] options)
     {
         _graphicsDevice = graphicsDevice;
         _content = content;
         _screenManager = screenManager;
+        _title = title;
+        _options = options;
     }
 
     public void Initialize()
@@ -38,6 +54,8 @@ public class ModeSelectScreen : IScreen
         _spriteBatch = new SpriteBatch(_graphicsDevice);
         _textFont = _content.Load<SpriteFont>("fonts/ScoreFont");
         _background = new RotatingBackground(_content);
+
+        _previousKeyboard = Keyboard.GetState();
     }
 
     public void Update(GameTime gameTime)
@@ -46,18 +64,13 @@ public class ModeSelectScreen : IScreen
 
         var keyboard = Keyboard.GetState();
 
-        bool soloPressed = IsKeyPressedThisFrame(keyboard, Keys.D1);
-        bool multiplayerPressed = IsKeyPressedThisFrame(keyboard, Keys.D2);
-
-        if (soloPressed)
+        foreach (var option in _options)
         {
-            _screenManager.RequestScreenChange(
-                new SoloModeSelectScreen(_graphicsDevice, _content, _screenManager));
-        }
-        else if (multiplayerPressed)
-        {
-            _screenManager.RequestScreenChange(
-                new PlayerJoinScreen(_graphicsDevice, _content, _screenManager));
+            if (IsKeyPressedThisFrame(keyboard, option.Key))
+            {
+                _screenManager.RequestScreenChange(option.CreateScreen());
+                break;
+            }
         }
 
         _previousKeyboard = keyboard;
@@ -78,11 +91,11 @@ public class ModeSelectScreen : IScreen
 
         _spriteBatch.DrawString(
             _textFont,
-            "ESCOLHA O MODO",
+            _title,
             new Vector2(0, 0),
             Color.Black);
 
-        string texto = "1 - Solo        2 - Multiplayer";
+        string texto = BuildOptionsText();
         Vector2 tamanho = _textFont.MeasureString(texto);
 
         float posX = (_graphicsDevice.Viewport.Width - tamanho.X) / 2;
@@ -95,5 +108,10 @@ public class ModeSelectScreen : IScreen
             Color.Black);
 
         _spriteBatch.End();
+    }
+
+    private string BuildOptionsText()
+    {
+        return string.Join("        ", System.Array.ConvertAll(_options, o => o.Label));
     }
 }

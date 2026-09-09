@@ -47,8 +47,7 @@ public class MainMenu : IScreen
             
         if (startPressed)
         {
-            _screenManager.RequestScreenChange(
-                new ModeSelectScreen(_graphicsDevice, _content, _screenManager));
+            _screenManager.RequestScreenChange(BuildModeSelectScreen());
         }
 
         _previousKeyboard = keyboard;
@@ -57,6 +56,38 @@ public class MainMenu : IScreen
     private bool IsKeyPressedThisFrame(KeyboardState current, Keys key)
     {
         return current.IsKeyDown(key) && !_previousKeyboard.IsKeyDown(key);
+    }
+
+    private IScreen BuildModeSelectScreen()
+    {
+        return new ChoiceScreen(
+            _graphicsDevice,
+            _content,
+            _screenManager,
+            "ESCOLHA O MODO",
+            new[]
+            {
+                new ChoiceOption(Keys.D1, "1 - Solo", BuildSoloModeSelectScreen),
+                new ChoiceOption(Keys.D2, "2 - Multiplayer", () =>
+                    new PlayerJoinScreen(_graphicsDevice, _content, _screenManager)),
+            });
+    }
+
+
+    private IScreen BuildSoloModeSelectScreen()
+    {
+        return new ChoiceScreen(
+            _graphicsDevice,
+            _content,
+            _screenManager,
+            "ESCOLHA O MODO SOLO",
+            new[]
+            {
+                new ChoiceOption(Keys.D1, "1 - Normal", () =>
+                    new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Solo)),
+                new ChoiceOption(Keys.D2, "2 - Treinamento", () =>
+                    new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Training)),
+            });
     }
 
     public void Draw()

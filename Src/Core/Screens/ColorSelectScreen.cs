@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace ClownJumper;
 
@@ -110,15 +111,30 @@ public class ColorSelectScreen : IScreen
         if (_player1Confirmed && _player2Confirmed)
         {
             _screenManager.RequestScreenChange(
-                new MultiplayerModeSelectScreen(
-                    _graphicsDevice,
-                    _content,
-                    _screenManager,
-                    _player1Source,
-                    _player2Source,
+                BuildMultiplayerModeSelectScreen(
                     AvailableColors[_player1ColorIndex].Value,
                     AvailableColors[_player2ColorIndex].Value));
         }
+    }
+    private IScreen BuildMultiplayerModeSelectScreen(Color player1Color, Color player2Color)
+    {
+        return new ChoiceScreen(
+            _graphicsDevice,
+            _content,
+            _screenManager,
+            "ESCOLHA O MODO MULTIPLAYER",
+            new[]
+            {
+                new ChoiceOption(Keys.D1, "1 - Coop", () =>
+                    new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Coop,
+                        _player1Source, _player2Source, player1Color, player2Color)),
+                new ChoiceOption(Keys.D2, "2 - Versus", () =>
+                    new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Versus,
+                        _player1Source, _player2Source, player1Color, player2Color)),
+                new ChoiceOption(Keys.D3, "3 - Treinamento", () =>
+                    new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.TrainingCoop,
+                        _player1Source, _player2Source, player1Color, player2Color)),
+            });
     }
 
     private void UpdatePlayerSelection(
