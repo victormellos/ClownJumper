@@ -84,13 +84,30 @@ public class Player
         if (!IsAlive)
             return;
 
+        if (_inputSource.IsGamepad)
+        {
+            float gamepadMove = 0f;
+
+            if (_inputSource.IsLeftPressed())
+                gamepadMove -= 10f;
+
+            if (_inputSource.IsRightPressed())
+                gamepadMove += 10f;
+
+            gamepadMove += _inputSource.GetAnalogAxis() * 15f;
+
+            gamepadMove = MathHelper.Clamp(gamepadMove, -10f, 10f);
+
+            Trampoline.Position.X += gamepadMove;
+
+            return;
+        }
+
         if (_inputSource.IsLeftPressed())
             Trampoline.Position.X -= 10f;
 
         if (_inputSource.IsRightPressed())
             Trampoline.Position.X += 10f;
-
-        Trampoline.Position.X += _inputSource.GetAnalogAxis() * 15f;
     }
 
     private void OnDeath()
