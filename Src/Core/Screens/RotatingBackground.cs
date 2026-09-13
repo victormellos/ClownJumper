@@ -24,8 +24,16 @@ public class RotatingBackground
     /// <summary>Velocidade de rotação, em radianos por segundo.</summary>
     private const float RotationSpeed = 0.3f;
 
+    /// <summary>
+    /// Ângulo de rotação atual, compartilhado por todas as instâncias.
+    /// Cada tela cria seu próprio <see cref="RotatingBackground"/> ao entrar
+    /// (via LoadContent), então se a rotação fosse um campo de instância ela
+    /// zeraria a cada troca de tela. Guardando aqui como static, o giro
+    /// continua de onde parou mesmo trocando de tela.
+    /// </summary>
+    private static float _sharedRotation;
+
     private readonly Texture2D _texture;
-    private float _rotation;
 
     public RotatingBackground(ContentManager content)
     {
@@ -34,7 +42,7 @@ public class RotatingBackground
 
     public void Update(GameTime gameTime)
     {
-        _rotation += RotationSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+        _sharedRotation += RotationSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
     }
 
     public void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
@@ -56,7 +64,7 @@ public class RotatingBackground
             center,
             null,
             Color.White,
-            _rotation,
+            _sharedRotation,
             origin,
             scale,
             SpriteEffects.None,
