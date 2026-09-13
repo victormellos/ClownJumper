@@ -24,6 +24,7 @@ public class ColorSelectScreen : IScreen
 
     private SpriteFont _textFont;
     private SpriteBatch _spriteBatch;
+    private RotatingBackground _background;
 
     // Lista de cores disponíveis para escolha, na ordem em que aparecem.
     private static readonly (string Name, Color Value)[] AvailableColors =
@@ -82,10 +83,13 @@ public class ColorSelectScreen : IScreen
     {
         _spriteBatch = new SpriteBatch(_graphicsDevice);
         _textFont = _content.Load<SpriteFont>("fonts/ScoreFont");
+        _background = new RotatingBackground(_content);
     }
 
     public void Update(GameTime gameTime)
     {
+        _background.Update(gameTime);
+
         if (!_player1Confirmed)
         {
             UpdatePlayerSelection(
@@ -190,6 +194,8 @@ public class ColorSelectScreen : IScreen
         _graphicsDevice.Clear(Color.YellowGreen);
 
         _spriteBatch.Begin();
+
+        _background.Draw(_spriteBatch, _graphicsDevice);
 
         int halfWidth = _graphicsDevice.Viewport.Width / 2;
 
