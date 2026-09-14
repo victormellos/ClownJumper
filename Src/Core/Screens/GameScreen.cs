@@ -31,12 +31,24 @@ public class GameScreen : IScreen
     private List<Player> _players;
 
     private Level _level = new();
-    private int _levelNumber;
 
     private readonly Random _random = new();
 
     private Sprite _balloonSprite;
     private readonly List<Balloon> _balloons = new();
+    private const int BalloonSize = 40;
+    private double _timeSinceLastSpawn;
+    private const int MaxBalloonsOnScreen = 40;
+    private const float BalloonMinSpeed = 25f;
+    private const float BalloonMaxSpeed = 70f;
+    private const int MaxSpawnPositionAttempts = 20;
+
+    private Texture2D _pixelTexture;
+    private readonly List<AirBurstEffect> _airBursts = new();
+
+    private const float AirBurstMinRadius = 60f;
+    private const float AirBurstMaxRadius = 160f;
+    private const float AirBurstForce = 260f;
 
     // Tamanho visual/hitbox que os personagens sempre tiveram (sprites antigos
     // eram 58x64 e 154x58). Os sprites novos são desenhados em 32x32, então
@@ -102,8 +114,7 @@ public class GameScreen : IScreen
 
             if (_mode == GameMode.Coop || _mode == GameMode.TrainingCoop)
             {
-                // No Coop, vidas, pontos e combo são do time: os dois jogadores
-                // passam a compartilhar a mesma instância de Score e TeamState.
+
                 var sharedTeam = new TeamState(player1.Lives);
                 var sharedScore = player1.Score;
 
@@ -123,6 +134,14 @@ public class GameScreen : IScreen
             Texture = _content.Load<Texture2D>("images/balloon_base"),
             TintTexture = _content.Load<Texture2D>("images/balloon_tint")
         };
+        _balloonSprite.Scale = new Vector2(
+            (float)BalloonSize / _balloonSprite.Texture.Width,
+            (float)BalloonSize / _balloonSprite.Texture.Height
+        );
+
+
+        _pixelTexture = new Texture2D(_graphicsDevice, 1, 1);
+        _pixelTexture.SetData(new[] { Color.White });
 
         _bounceSound = _content.Load<SoundEffect>("sounds/bounce");
         _popSound = _content.Load<SoundEffect>("sounds/pop");
@@ -195,62 +214,78 @@ public class GameScreen : IScreen
         }
     }
 
-    public void CreateBalloons(int quantity)
+    private void SpawnRandomBalloon()
     {
-        _balloons.Clear();
+        var type = Balloon.RollType(_random);
 
-        const int spacingX = 4;
-        const int spacingY = 4;
+        Vector2 position = FindFreeSpawnPosition();
 
-        int rows = quantity;
-
-        int balloonSize = (_graphicsDevice.Viewport.Height - ((rows - 1) * spacingY)) / rows;
-        balloonSize = Math.Clamp(balloonSize, 16, 48);
-
-        int columns = (_graphicsDevice.Viewport.Width + spacingX) / (balloonSize + spacingX);
-
-        _balloonSprite.Scale = new Vector2(
-            (float)balloonSize / _balloonSprite.Texture.Width,
-            (float)balloonSize / _balloonSprite.Texture.Height
-        );
-
-        for (int y = 0; y < rows; y++)
+        var balloon = new Balloon(position, type.Value)
         {
-            for (int x = 0; x < columns; x++)
-            {
-                var type = Balloon.RollType(_random);
+            Sprite = _balloonSprite,
+            Width = BalloonSize,
+            Height = BalloonSize,
+            TintColor = type.TintColor,
+            TimeToLive = type.TimeToLive,
+            WanderVelocity = RollWanderVelocity()
+        };
 
-                var balloon = new Balloon(
-                    new Vector2(
-                        x * (balloonSize + spacingX),
-                        y * (balloonSize + spacingY)
-                    ),
-                    type.Value
-                )
-                {
-                    Sprite = _balloonSprite,
-                    Width = balloonSize,
-                    Height = balloonSize,
-                    TintColor = type.TintColor,
-                    TimeToLive = type.TimeToLive
-                };
-
-                _balloons.Add(balloon);
-            }
-        }
+        _balloons.Add(balloon);
     }
 
-    /// <summary>
-    /// Envelhece cada balão na tela e remove (sem pontuar nem penalizar) os
-    /// que ultrapassaram seu tempo de vida. Vermelho tem TimeToLive nulo e
-    /// nunca expira por aqui.
-    /// </summary>
+    private Vector2 FindFreeSpawnPosition()
+    {
+        int maxX = Math.Max(0, _graphicsDevice.Viewport.Width - BalloonSize);
+        int maxY = Math.Max(0, _graphicsDevice.Viewport.Height - BalloonSize);
+
+        Vector2 candidate = Vector2.Zero;
+
+        for (int attempt = 0; attempt < MaxSpawnPositionAttempts; attempt++)
+        {
+            candidate = new Vector2(_random.Next(0, maxX + 1), _random.Next(0, maxY + 1));
+
+            if (!OverlapsAnyBalloon(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return candidate;
+    }
+
+    private bool OverlapsAnyBalloon(Vector2 candidatePosition)
+    {
+        var candidateBounds = new Rectangle((int)candidatePosition.X, (int)candidatePosition.Y, BalloonSize, BalloonSize);
+
+        foreach (var balloon in _balloons)
+        {
+            var bounds = new Rectangle((int)balloon.Position.X, (int)balloon.Position.Y, balloon.Width, balloon.Height);
+
+            if (candidateBounds.Intersects(bounds))
+                return true;
+        }
+
+        return false;
+    }
+
+    private Vector2 RollWanderVelocity()
+    {
+        double angle = _random.NextDouble() * MathHelper.TwoPi;
+        float speed = BalloonMinSpeed + (float)_random.NextDouble() * (BalloonMaxSpeed - BalloonMinSpeed);
+
+        return new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * speed;
+    }
+
+
     private void UpdateBalloonLifetimes(GameTime gameTime)
     {
+        var bounds = new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
+
         for (int i = _balloons.Count - 1; i >= 0; i--)
         {
             var balloon = _balloons[i];
             balloon.UpdateLifetime(gameTime);
+            balloon.UpdateMovement(gameTime, bounds);
 
             if (balloon.IsExpired)
             {
@@ -269,18 +304,10 @@ public class GameScreen : IScreen
             player.HandleInput();
         }
 
-        if (_balloons.Count == 0)
-        {
-            _levelNumber++;
-            _level = new Level();
-            // TODO(Etapa 3/4): CreateBalloons(quantity) em grid será substituído
-            // pelo spawn contínuo em posição aleatória guiado por _level.SpawnInterval.
-            // Usamos _levelNumber como ponte temporária só pra manter a build íntegra
-            // entre etapas.
-            CreateBalloons(_levelNumber);
-        }
-
+        _level.Update(gameTime);
+        UpdateBalloonSpawning(gameTime);
         UpdateBalloonLifetimes(gameTime);
+        UpdateAirBursts(gameTime);
 
         foreach (var player in _players)
         {
@@ -290,6 +317,77 @@ public class GameScreen : IScreen
         if (_mode == GameMode.Coop || _mode == GameMode.TrainingCoop)
         {
             CheckCoopGameOver();
+        }
+    }
+
+    private void UpdateBalloonSpawning(GameTime gameTime)
+    {
+        if (_balloons.Count >= MaxBalloonsOnScreen)
+        {
+            // Não acumula tempo de espera enquanto está no limite, senão
+            // vários balões nasceriam de uma vez assim que abrisse espaço.
+            _timeSinceLastSpawn = 0;
+            return;
+        }
+
+        _timeSinceLastSpawn += gameTime.ElapsedGameTime.TotalSeconds;
+
+        int highestCombo = 1;
+        foreach (var player in _players)
+        {
+            if (player.Score.Combo > highestCombo)
+                highestCombo = player.Score.Combo;
+        }
+
+        double spawnInterval = _level.GetSpawnInterval(highestCombo);
+
+        if (_timeSinceLastSpawn >= spawnInterval)
+        {
+            _timeSinceLastSpawn -= spawnInterval;
+            SpawnRandomBalloon();
+        }
+    }
+
+    private void UpdateAirBursts(GameTime gameTime)
+    {
+        for (int i = _airBursts.Count - 1; i >= 0; i--)
+        {
+            _airBursts[i].Update(gameTime);
+
+            if (_airBursts[i].IsFinished)
+            {
+                _airBursts.RemoveAt(i);
+            }
+        }
+    }
+
+
+    private void ApplyAirBurst(Balloon poppedBalloon)
+    {
+        Vector2 center = poppedBalloon.Position + new Vector2(poppedBalloon.Width / 2f, poppedBalloon.Height / 2f);
+
+        int maxValue = Balloon.Types[Balloon.Types.Length - 1].Value;
+        float rarityFactor = MathHelper.Clamp((float)poppedBalloon.Value / maxValue, 0f, 1f);
+        float radius = MathHelper.Lerp(AirBurstMinRadius, AirBurstMaxRadius, rarityFactor);
+
+        _airBursts.Add(new AirBurstEffect(center, poppedBalloon.TintColor, radius));
+
+        foreach (var balloon in _balloons)
+        {
+            if (balloon == poppedBalloon)
+                continue;
+
+            Vector2 otherCenter = balloon.Position + new Vector2(balloon.Width / 2f, balloon.Height / 2f);
+            Vector2 offset = otherCenter - center;
+            float distance = offset.Length();
+
+            if (distance >= radius || distance <= 0.001f)
+                continue;
+
+            Vector2 direction = offset / distance;
+
+            float strength = 1f - (distance / radius);
+            balloon.ApplyBurstImpulse(direction * AirBurstForce * strength);
         }
     }
 
@@ -408,6 +506,8 @@ public class GameScreen : IScreen
             if (Collision.Intersects(clown, balloon))
             {
                 player.Score.AddPoints(balloon.Value);
+                ApplyAirBurst(balloon);
+                _level.RegisterPop();
                 _balloons.RemoveAt(i);
                 _popSound.Play();
             }
@@ -451,8 +551,35 @@ public class GameScreen : IScreen
         }
 
         DrawLives();
+        DrawAirBursts();
 
         _spriteBatch.End();
+    }
+
+    private void DrawAirBursts()
+    {
+        const int segments = 16;
+
+        foreach (var burst in _airBursts)
+        {
+            Color color = burst.TintColor * burst.CurrentAlpha;
+            float radius = burst.CurrentRadius;
+
+            if (radius <= 0f)
+                continue;
+
+            for (int i = 0; i < segments; i++)
+            {
+                double angle = (i / (double)segments) * MathHelper.TwoPi;
+                Vector2 point = burst.Center + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * radius;
+
+                const int dotSize = 4;
+                _spriteBatch.Draw(
+                    _pixelTexture,
+                    new Rectangle((int)point.X - dotSize / 2, (int)point.Y - dotSize / 2, dotSize, dotSize),
+                    color);
+            }
+        }
     }
 
     /// <summary>

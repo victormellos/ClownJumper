@@ -17,6 +17,8 @@ public class Level
     private const double InitialSpawnInterval = 1.2; // segundos
     private const double MinSpawnInterval = 0.2; // segundos
 
+    private const double IntervalReductionPerCombo = 0.01;
+
     public int Number { get; private set; } = 1;
     public double SpawnInterval { get; private set; } = InitialSpawnInterval;
 
@@ -45,6 +47,14 @@ public class Level
         {
             AdvanceLevel();
         }
+    }
+
+    public double GetSpawnInterval(int combo)
+    {
+        double comboMultiplier = Math.Max(0.0, 1.0 - (combo - 1) * IntervalReductionPerCombo);
+        double interval = SpawnInterval * comboMultiplier;
+
+        return Math.Max(MinSpawnInterval, interval);
     }
 
     private void AdvanceLevel()

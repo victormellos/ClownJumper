@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 
 namespace ClownJumper
@@ -51,21 +52,78 @@ namespace ClownJumper
         public override int Width { get; set; } = 64;
         public override int Height { get; set; } = 64;
 
+        public Vector2 WanderVelocity;
+
+        private Vector2 _burstVelocity;
+
+        private const float BurstDecayPerSecond = 0.05f;
+
         public Balloon(Vector2 initialPosition, int value)
             : base(initialPosition, Vector2.Zero)
         {
             Value = value;
         }
+
         public void UpdateLifetime(GameTime gameTime)
         {
             Age += gameTime.ElapsedGameTime.TotalSeconds;
+        }
+        public void ApplyBurstImpulse(Vector2 impulse)
+        {
+            _burstVelocity += impulse;
+        }
+        public void UpdateMovement(GameTime gameTime, Rectangle bounds)
+        {
+            float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            Velocity = WanderVelocity + _burstVelocity;
+            Position += Velocity * elapsed;
+
+            _burstVelocity *= MathF.Pow(BurstDecayPerSecond, elapsed);
+            if (_burstVelocity.LengthSquared() < 25f)
+                _burstVelocity = Vector2.Zero;
+
+            BounceWithinBounds(bounds);
+        }
+        private void BounceWithinBounds(Rectangle bounds)
+        {
+            int minX = bounds.Left;
+            int maxX = bounds.Right - Width;
+            int minY = bounds.Top;
+            int maxY = bounds.Bottom - Height;
+
+            if (Position.X < minX)
+            {
+                Position.X = minX;
+                WanderVelocity.X = Math.Abs(WanderVelocity.X);
+                _burstVelocity.X = Math.Abs(_burstVelocity.X);
+            }
+            else if (Position.X > maxX)
+            {
+                Position.X = maxX;
+                WanderVelocity.X = -Math.Abs(WanderVelocity.X);
+                _burstVelocity.X = -Math.Abs(_burstVelocity.X);
+            }
+
+            if (Position.Y < minY)
+            {
+                Position.Y = minY;
+                WanderVelocity.Y = Math.Abs(WanderVelocity.Y);
+                _burstVelocity.Y = Math.Abs(_burstVelocity.Y);
+            }
+            else if (Position.Y > maxY)
+            {
+                Position.Y = maxY;
+                WanderVelocity.Y = -Math.Abs(WanderVelocity.Y);
+                _burstVelocity.Y = -Math.Abs(_burstVelocity.Y);
+            }
         }
 
         /// <summary>
         /// Sorteia um tipo de balão com base nos pesos de raridade em Types,
         /// usando o Random compartilhado passado por quem chama (ex.: GameScreen).
         /// </summary>
-        public static BalloonType RollType(System.Random random)
+        public static BalloonType RollType(Random random)
         {
             double totalWeight = 0.0;
             foreach (var type in Types)
