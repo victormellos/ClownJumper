@@ -1,31 +1,38 @@
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
 namespace ClownJumper;
 
-/// <summary>
-/// Controla qual tela está ativa e faz a transição entre elas.
-/// Cada tela recebe uma referência a este manager e chama RequestScreenChange
-/// quando quiser trocar de tela (ex.: "START" no menu -> gameplay).
-/// </summary>
 public class ScreenManager
 {
-    private IScreen _currentScreen;
+    private readonly Stack<IScreen> _screenStack = new();
+
+    private IScreen CurrentScreen => _screenStack.Count > 0 ? _screenStack.Peek() : null;
 
     public void RequestScreenChange(IScreen newScreen)
     {
-        _currentScreen = newScreen;
+        _screenStack.Push(newScreen);
 
-        _currentScreen.Initialize();
-        _currentScreen.LoadContent();
+        newScreen.Initialize();
+        newScreen.LoadContent();
+    }
+
+
+    public void RequestGoBack()
+    {
+        if (_screenStack.Count <= 1)
+            return;
+
+        _screenStack.Pop();
     }
 
     public void Update(GameTime gameTime)
     {
-        _currentScreen?.Update(gameTime);
+        CurrentScreen?.Update(gameTime);
     }
 
     public void Draw()
     {
-        _currentScreen?.Draw();
+        CurrentScreen?.Draw();
     }
 }

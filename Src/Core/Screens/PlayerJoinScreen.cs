@@ -84,6 +84,16 @@ public class PlayerJoinScreen : IScreen
         {
             _screenManager.RequestScreenChange(
                 new ColorSelectScreen(_graphicsDevice, _content, _screenManager, _joinedSources[0], _joinedSources[1]));
+            return;
+        }
+
+        foreach (var source in _candidateSources)
+        {
+            if (source.IsUpPressed())
+            {
+                _screenManager.RequestGoBack();
+                return;
+            }
         }
     }
 
@@ -97,7 +107,7 @@ public class PlayerJoinScreen : IScreen
 
         _spriteBatch.DrawString(
             _textFont,
-            "Aperte ESQUERDA para entrar (2 jogadores)",
+            "Aperte ESQUERDA para entrar (2 jogadores) | CIMA para voltar",
             new Vector2(0, 0),
             Color.Black);
 

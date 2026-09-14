@@ -4,15 +4,19 @@ namespace ClownJumper;
 
 public class ClownGame : Game
 {
+    private const int WindowedWidth = 800;
+    private const int WindowedHeight = 500;
+
     private readonly GraphicsDeviceManager _graphics;
     private readonly ScreenManager _screenManager = new();
+    private FullscreenController _fullscreenController;
 
     public ClownGame()
     {
         _graphics = new GraphicsDeviceManager(this)
         {
-            PreferredBackBufferWidth = 800,
-            PreferredBackBufferHeight = 500
+            PreferredBackBufferWidth = WindowedWidth,
+            PreferredBackBufferHeight = WindowedHeight
         };
 
         Content.RootDirectory = "Content";
@@ -23,12 +27,15 @@ public class ClownGame : Game
     {
         base.Initialize();
 
+        _fullscreenController = new FullscreenController(_graphics, WindowedWidth, WindowedHeight);
+
         _screenManager.RequestScreenChange(
             new MainMenu(GraphicsDevice, Content, _screenManager));
     }
 
     protected override void Update(GameTime gameTime)
     {
+        _fullscreenController.Update();
         _screenManager.Update(gameTime);
         base.Update(gameTime);
     }

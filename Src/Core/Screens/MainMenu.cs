@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace ClownJumper;
 
@@ -15,7 +14,7 @@ public class MainMenu : IScreen
     private SpriteBatch _spriteBatch;
     private RotatingBackground _background;
 
-    private KeyboardState _previousKeyboard;
+    private readonly MenuNavigator _navigator = new();
 
     public MainMenu(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager)
     {
@@ -38,24 +37,12 @@ public class MainMenu : IScreen
     public void Update(GameTime gameTime)
     {
         _background.Update(gameTime);
+        _navigator.Update();
 
-        var keyboard = Keyboard.GetState();
-
-        bool startPressed =
-            IsKeyPressedThisFrame(keyboard, Keys.Enter) ||
-            IsKeyPressedThisFrame(keyboard, Keys.Space);
-            
-        if (startPressed)
+        if (_navigator.ConfirmPressed)
         {
             _screenManager.RequestScreenChange(BuildModeSelectScreen());
         }
-
-        _previousKeyboard = keyboard;
-    }
-
-    private bool IsKeyPressedThisFrame(KeyboardState current, Keys key)
-    {
-        return current.IsKeyDown(key) && !_previousKeyboard.IsKeyDown(key);
     }
 
     private IScreen BuildModeSelectScreen()
@@ -67,8 +54,8 @@ public class MainMenu : IScreen
             "ESCOLHA O MODO",
             new[]
             {
-                new ChoiceOption(Keys.D1, "1 - Solo", BuildSoloModeSelectScreen),
-                new ChoiceOption(Keys.D2, "2 - Multiplayer", () =>
+                new ChoiceOption("Solo", BuildSoloModeSelectScreen),
+                new ChoiceOption("Multiplayer", () =>
                     new PlayerJoinScreen(_graphicsDevice, _content, _screenManager)),
             });
     }
@@ -83,9 +70,9 @@ public class MainMenu : IScreen
             "ESCOLHA O MODO SOLO",
             new[]
             {
-                new ChoiceOption(Keys.D1, "1 - Normal", () =>
+                new ChoiceOption("Normal", () =>
                     new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Solo)),
-                new ChoiceOption(Keys.D2, "2 - Treinamento", () =>
+                new ChoiceOption("Treinamento", () =>
                     new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Training)),
             });
     }
@@ -104,7 +91,7 @@ public class MainMenu : IScreen
             new Vector2(0, 0),
             Color.Black);
 
-        string texto = "Pressione ENTER ou ESPACO para jogar";
+        string texto = "Pressione BAIXO para jogar";
         Vector2 tamanho = _textFont.MeasureString(texto);
 
         float posX = (_graphicsDevice.Viewport.Width - tamanho.X) / 2;

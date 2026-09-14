@@ -1,21 +1,9 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace ClownJumper;
 
-/// <summary>
-/// Tela genérica de "escolha entre opções por texto": mostra um título no
-/// topo e uma linha de opções embaixo (ex.: "1 - Normal        2 -
-/// Treinamento"), cada uma associada a uma tecla. Ao pressionar a tecla de
-/// uma opção, troca para a tela retornada por ChoiceOption.CreateScreen.
-///
-/// Substitui o que antes eram telas separadas e praticamente idênticas
-/// (ModeSelectScreen, SoloModeSelectScreen, MultiplayerModeSelectScreen):
-/// a única diferença real entre elas era o título e as opções, então agora
-/// isso é passado como dado no construtor em vez de duplicar a classe.
-/// </summary>
 public class ChoiceScreen : IScreen
 {
     private readonly GraphicsDevice _graphicsDevice;
@@ -29,7 +17,8 @@ public class ChoiceScreen : IScreen
     private SpriteBatch _spriteBatch;
     private RotatingBackground _background;
 
-    private KeyboardState _previousKeyboard;
+    private readonly MenuNavigator _navigator = new();
+    private int _selectedIndex;
 
     public ChoiceScreen(
         GraphicsDevice graphicsDevice,
@@ -47,6 +36,7 @@ public class ChoiceScreen : IScreen
 
     public void Initialize()
     {
+        _selectedIndex = 0;
     }
 
     public void LoadContent()
@@ -54,31 +44,32 @@ public class ChoiceScreen : IScreen
         _spriteBatch = new SpriteBatch(_graphicsDevice);
         _textFont = _content.Load<SpriteFont>("fonts/ScoreFont");
         _background = new RotatingBackground(_content);
-
-        _previousKeyboard = Keyboard.GetState();
     }
 
     public void Update(GameTime gameTime)
     {
         _background.Update(gameTime);
+        _navigator.Update();
 
-        var keyboard = Keyboard.GetState();
-
-        foreach (var option in _options)
+        if (_navigator.LeftPressed)
         {
-            if (IsKeyPressedThisFrame(keyboard, option.Key))
-            {
-                _screenManager.RequestScreenChange(option.CreateScreen());
-                break;
-            }
+            _selectedIndex = (_selectedIndex - 1 + _options.Length) % _options.Length;
+        }
+        else if (_navigator.RightPressed)
+        {
+            _selectedIndex = (_selectedIndex + 1) % _options.Length;
         }
 
-        _previousKeyboard = keyboard;
-    }
+        if (_navigator.ConfirmPressed)
+        {
+            _screenManager.RequestScreenChange(_options[_selectedIndex].CreateScreen());
+            return;
+        }
 
-    private bool IsKeyPressedThisFrame(KeyboardState current, Keys key)
-    {
-        return current.IsKeyDown(key) && !_previousKeyboard.IsKeyDown(key);
+        if (_navigator.CancelPressed)
+        {
+            _screenManager.RequestGoBack();
+        }
     }
 
     public void Draw()
@@ -95,23 +86,41 @@ public class ChoiceScreen : IScreen
             new Vector2(0, 0),
             Color.Black);
 
-        string texto = BuildOptionsText();
-        Vector2 tamanho = _textFont.MeasureString(texto);
-
-        float posX = (_graphicsDevice.Viewport.Width - tamanho.X) / 2;
-        float posY = _graphicsDevice.Viewport.Height - tamanho.Y - 10;
-
-        _spriteBatch.DrawString(
-            _textFont,
-            texto,
-            new Vector2(posX, posY),
-            Color.Black);
+        DrawOptions();
 
         _spriteBatch.End();
     }
 
-    private string BuildOptionsText()
+    private void DrawOptions()
     {
-        return string.Join("        ", System.Array.ConvertAll(_options, o => o.Label));
+        const string spacing = "     ";
+
+        float totalWidth = 0f;
+        var optionTexts = new string[_options.Length];
+
+        for (int i = 0; i < _options.Length; i++)
+        {
+            optionTexts[i] = i == _selectedIndex
+                ? $"[{_options[i].Label}]"
+                : _options[i].Label;
+
+            totalWidth += _textFont.MeasureString(optionTexts[i]).X;
+
+            if (i < _options.Length - 1)
+                totalWidth += _textFont.MeasureString(spacing).X;
+        }
+
+        Vector2 lineSize = _textFont.MeasureString("X");
+        float posX = (_graphicsDevice.Viewport.Width - totalWidth) / 2;
+        float posY = _graphicsDevice.Viewport.Height - lineSize.Y - 10;
+
+        for (int i = 0; i < _options.Length; i++)
+        {
+            Color color = i == _selectedIndex ? Color.DarkGreen : Color.Black;
+
+            _spriteBatch.DrawString(_textFont, optionTexts[i], new Vector2(posX, posY), color);
+
+            posX += _textFont.MeasureString(optionTexts[i]).X + _textFont.MeasureString(spacing).X;
+        }
     }
 }

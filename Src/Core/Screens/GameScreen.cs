@@ -330,6 +330,8 @@ public class GameScreen : IScreen
             _graphicsDevice.Viewport.Width - trampoline.Width
         );
 
+        trampoline.Position.Y = _graphicsDevice.Viewport.Height - trampoline.Height;
+
         var clown = player.Clown;
         if (clown == null)
             return;

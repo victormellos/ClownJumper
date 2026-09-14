@@ -2,17 +2,10 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace ClownJumper;
 
-/// <summary>
-/// Tela exibida depois do PlayerJoinScreen, onde cada um dos 2 jogadores
-/// escolhe a cor do seu palhaço. A tela é dividida ao meio (jogador 1 à
-/// esquerda, jogador 2 à direita); cada um navega a lista de cores com
-/// esquerda/direita e confirma com "baixo". Uma cor já confirmada por um
-/// jogador fica indisponível para o outro.
-/// </summary>
+
 public class ColorSelectScreen : IScreen
 {
     private readonly GraphicsDevice _graphicsDevice;
@@ -55,6 +48,8 @@ public class ColorSelectScreen : IScreen
     private bool _player1WasRightDown;
     private bool _player2WasLeftDown;
     private bool _player2WasRightDown;
+    private bool _player1WasUpDown;
+    private bool _player2WasUpDown;
 
     public ColorSelectScreen(
         GraphicsDevice graphicsDevice,
@@ -100,6 +95,10 @@ public class ColorSelectScreen : IScreen
                 ref _player1WasRightDown,
                 () => _player1Confirmed = true);
         }
+        else if (IsUpPressedThisFrame(_player1Source, ref _player1WasUpDown))
+        {
+            _player1Confirmed = false;
+        }
 
         if (!_player2Confirmed)
         {
@@ -111,6 +110,10 @@ public class ColorSelectScreen : IScreen
                 ref _player2WasRightDown,
                 () => _player2Confirmed = true);
         }
+        else if (IsUpPressedThisFrame(_player2Source, ref _player2WasUpDown))
+        {
+            _player2Confirmed = false;
+        }
 
         if (_player1Confirmed && _player2Confirmed)
         {
@@ -118,8 +121,26 @@ public class ColorSelectScreen : IScreen
                 BuildMultiplayerModeSelectScreen(
                     AvailableColors[_player1ColorIndex].Value,
                     AvailableColors[_player2ColorIndex].Value));
+            return;
+        }
+
+        if (!_player1Confirmed && !_player2Confirmed &&
+            (_player1Source.IsUpPressed() || _player2Source.IsUpPressed()))
+        {
+            _screenManager.RequestGoBack();
         }
     }
+
+    private static bool IsUpPressedThisFrame(InputSource source, ref bool wasUpDown)
+    {
+        bool upDown = source.IsUpPressed();
+        bool pressedThisFrame = upDown && !wasUpDown;
+
+        wasUpDown = upDown;
+
+        return pressedThisFrame;
+    }
+
     private IScreen BuildMultiplayerModeSelectScreen(Color player1Color, Color player2Color)
     {
         return new ChoiceScreen(
@@ -129,13 +150,13 @@ public class ColorSelectScreen : IScreen
             "ESCOLHA O MODO MULTIPLAYER",
             new[]
             {
-                new ChoiceOption(Keys.D1, "1 - Coop", () =>
+                new ChoiceOption("Coop", () =>
                     new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Coop,
                         _player1Source, _player2Source, player1Color, player2Color)),
-                new ChoiceOption(Keys.D2, "2 - Versus", () =>
+                new ChoiceOption("Versus", () =>
                     new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Versus,
                         _player1Source, _player2Source, player1Color, player2Color)),
-                new ChoiceOption(Keys.D3, "3 - Treinamento", () =>
+                new ChoiceOption("Treinamento", () =>
                     new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.TrainingCoop,
                         _player1Source, _player2Source, player1Color, player2Color)),
             });
@@ -170,10 +191,7 @@ public class ColorSelectScreen : IScreen
         }
     }
 
-    /// <summary>
-    /// Anda na lista de cores a partir de currentIndex na direção informada
-    /// (1 ou -1), pulando a cor que o outro jogador já tem escolhida.
-    /// </summary>
+
     private int FindNextAvailable(int currentIndex, int otherPlayerColorIndex, int direction)
     {
         int index = currentIndex;
@@ -246,7 +264,7 @@ public class ColorSelectScreen : IScreen
 
         if (!confirmed)
         {
-            string helpText = "<- ->  escolher     baixo  confirmar";
+            string helpText = "<- ->  escolher     baixo  confirmar     cima  voltar";
             Vector2 helpSize = _textFont.MeasureString(helpText);
 
             _spriteBatch.DrawString(
