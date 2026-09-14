@@ -42,13 +42,14 @@ public class ColorSelectScreen : IScreen
     private bool _player1Confirmed;
     private bool _player2Confirmed;
 
-    // Evita que segurar a tecla repita o movimento a cada frame; só reage
-    // no frame em que o botão passou de solto para pressionado.
+
     private bool _player1WasLeftDown;
     private bool _player1WasRightDown;
+    private bool _player1WasDownDown;
+    private bool _player1WasUpDown;
     private bool _player2WasLeftDown;
     private bool _player2WasRightDown;
-    private bool _player1WasUpDown;
+    private bool _player2WasDownDown;
     private bool _player2WasUpDown;
 
     public ColorSelectScreen(
@@ -72,6 +73,16 @@ public class ColorSelectScreen : IScreen
 
         _player1Confirmed = false;
         _player2Confirmed = false;
+
+        _player1WasLeftDown = _player1Source.IsLeftPressed();
+        _player1WasRightDown = _player1Source.IsRightPressed();
+        _player1WasDownDown = _player1Source.IsDownPressed();
+        _player1WasUpDown = _player1Source.IsUpPressed();
+
+        _player2WasLeftDown = _player2Source.IsLeftPressed();
+        _player2WasRightDown = _player2Source.IsRightPressed();
+        _player2WasDownDown = _player2Source.IsDownPressed();
+        _player2WasUpDown = _player2Source.IsUpPressed();
     }
 
     public void LoadContent()
@@ -85,6 +96,9 @@ public class ColorSelectScreen : IScreen
     {
         _background.Update(gameTime);
 
+        bool player1UpPressedThisFrame = IsUpPressedThisFrame(_player1Source, ref _player1WasUpDown);
+        bool player2UpPressedThisFrame = IsUpPressedThisFrame(_player2Source, ref _player2WasUpDown);
+
         if (!_player1Confirmed)
         {
             UpdatePlayerSelection(
@@ -93,9 +107,10 @@ public class ColorSelectScreen : IScreen
                 _player2ColorIndex,
                 ref _player1WasLeftDown,
                 ref _player1WasRightDown,
+                ref _player1WasDownDown,
                 () => _player1Confirmed = true);
         }
-        else if (IsUpPressedThisFrame(_player1Source, ref _player1WasUpDown))
+        else if (player1UpPressedThisFrame)
         {
             _player1Confirmed = false;
         }
@@ -108,9 +123,10 @@ public class ColorSelectScreen : IScreen
                 _player1ColorIndex,
                 ref _player2WasLeftDown,
                 ref _player2WasRightDown,
+                ref _player2WasDownDown,
                 () => _player2Confirmed = true);
         }
-        else if (IsUpPressedThisFrame(_player2Source, ref _player2WasUpDown))
+        else if (player2UpPressedThisFrame)
         {
             _player2Confirmed = false;
         }
@@ -124,8 +140,9 @@ public class ColorSelectScreen : IScreen
             return;
         }
 
+
         if (!_player1Confirmed && !_player2Confirmed &&
-            (_player1Source.IsUpPressed() || _player2Source.IsUpPressed()))
+            (player1UpPressedThisFrame || player2UpPressedThisFrame))
         {
             _screenManager.RequestGoBack();
         }
@@ -168,10 +185,12 @@ public class ColorSelectScreen : IScreen
         int otherPlayerColorIndex,
         ref bool wasLeftDown,
         ref bool wasRightDown,
+        ref bool wasDownDown,
         System.Action onConfirm)
     {
         bool leftDown = source.IsLeftPressed();
         bool rightDown = source.IsRightPressed();
+        bool downDown = source.IsDownPressed();
 
         if (leftDown && !wasLeftDown)
         {
@@ -185,10 +204,12 @@ public class ColorSelectScreen : IScreen
         wasLeftDown = leftDown;
         wasRightDown = rightDown;
 
-        if (source.IsDownPressed())
+        if (downDown && !wasDownDown)
         {
             onConfirm();
         }
+
+        wasDownDown = downDown;
     }
 
 

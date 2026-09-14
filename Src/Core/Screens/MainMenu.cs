@@ -25,6 +25,7 @@ public class MainMenu : IScreen
 
     public void Initialize()
     {
+        _navigator.Prime();
     }
 
     public void LoadContent()

@@ -15,6 +15,14 @@ public class MenuNavigator
     private bool _wasConfirmDown;
     private bool _wasCancelDown;
 
+    public void Prime()
+    {
+        _wasLeftDown = IsLeftDown();
+        _wasRightDown = IsRightDown();
+        _wasConfirmDown = IsConfirmDown();
+        _wasCancelDown = IsCancelDown();
+    }
+
     public void Update()
     {
         bool leftDown = IsLeftDown();

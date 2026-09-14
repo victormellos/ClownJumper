@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClownJumper;
 
+
 public class ChoiceScreen : IScreen
 {
     private readonly GraphicsDevice _graphicsDevice;
@@ -37,6 +38,8 @@ public class ChoiceScreen : IScreen
     public void Initialize()
     {
         _selectedIndex = 0;
+
+        _navigator.Prime();
     }
 
     public void LoadContent()

@@ -28,6 +28,8 @@ public class PlayerJoinScreen : IScreen
 
     private readonly List<InputSource> _joinedSources = new();
 
+    private bool[] _wasUpDown;
+
     public PlayerJoinScreen(GraphicsDevice graphicsDevice, ContentManager content, ScreenManager screenManager)
     {
         _graphicsDevice = graphicsDevice;
@@ -54,6 +56,12 @@ public class PlayerJoinScreen : IScreen
             "Controle 1",
             "Controle 2",
         };
+
+        _wasUpDown = new bool[_candidateSources.Length];
+        for (int i = 0; i < _candidateSources.Length; i++)
+        {
+            _wasUpDown[i] = _candidateSources[i].IsUpPressed();
+        }
     }
 
     public void LoadContent()
@@ -67,16 +75,12 @@ public class PlayerJoinScreen : IScreen
     {
         _background.Update(gameTime);
 
-        for (int i = 0; i < _candidateSources.Length; i++)
+        foreach (var source in _candidateSources)
         {
-            var source = _candidateSources[i];
-
-            if (_joinedSources.Contains(source))
-                continue;
-
             if (source.IsLeftPressed())
             {
-                _joinedSources.Add(source);
+                if (!_joinedSources.Contains(source))
+                    _joinedSources.Add(source);
             }
         }
 
@@ -87,9 +91,14 @@ public class PlayerJoinScreen : IScreen
             return;
         }
 
-        foreach (var source in _candidateSources)
+        for (int i = 0; i < _candidateSources.Length; i++)
         {
-            if (source.IsUpPressed())
+            bool upDown = _candidateSources[i].IsUpPressed();
+            bool pressedThisFrame = upDown && !_wasUpDown[i];
+
+            _wasUpDown[i] = upDown;
+
+            if (pressedThisFrame)
             {
                 _screenManager.RequestGoBack();
                 return;
