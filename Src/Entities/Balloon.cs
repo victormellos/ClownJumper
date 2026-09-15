@@ -125,25 +125,39 @@ namespace ClownJumper
         /// </summary>
         public static BalloonType RollType(Random random)
         {
+            return RollType(random, Types.Length);
+        }
+
+        /// <summary>
+        /// Sorteia um tipo de balão apenas entre as primeiras
+        /// <paramref name="unlockedColorCount"/> cores de Types (na mesma
+        /// ordem em que estão definidas ali), mantendo os pesos originais
+        /// entre elas. Usado pelo upgrade de Sorte do modo história: com
+        /// menos cores desbloqueadas, o sorteio nem considera as demais.
+        /// </summary>
+        public static BalloonType RollType(Random random, int unlockedColorCount)
+        {
+            int count = Math.Clamp(unlockedColorCount, 1, Types.Length);
+
             double totalWeight = 0.0;
-            foreach (var type in Types)
+            for (int i = 0; i < count; i++)
             {
-                totalWeight += type.Weight;
+                totalWeight += Types[i].Weight;
             }
 
             double roll = random.NextDouble() * totalWeight;
             double cumulative = 0.0;
 
-            foreach (var type in Types)
+            for (int i = 0; i < count; i++)
             {
-                cumulative += type.Weight;
+                cumulative += Types[i].Weight;
                 if (roll < cumulative)
                 {
-                    return type;
+                    return Types[i];
                 }
             }
 
-            return Types[Types.Length - 1];
+            return Types[count - 1];
         }
     }
 }

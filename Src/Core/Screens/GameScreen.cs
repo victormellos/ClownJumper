@@ -19,6 +19,12 @@ public class GameScreen : IScreen
     private readonly Color _player1Color;
     private readonly Color _player2Color;
 
+    // Economia do modo história (Solo): só é criada/usada quando _mode é
+    // GameMode.Solo. Os outros modos (Treino/Coop/Versus) nunca tocam nisso.
+    private SoloSaveData _soloSaveData;
+    private SoloUpgrades _soloUpgrades;
+    private bool IsSoloStoryMode => _mode == GameMode.Solo;
+
     private SoundEffect _bounceSound;
     private SoundEffect _popSound;
 
@@ -63,6 +69,12 @@ public class GameScreen : IScreen
     private const int HeartSize = 20;
     private const int HeartSpacing = 4;
 
+    /// <summary>
+    /// Acima dessa quantidade de vidas, DrawLives troca o desenho de N
+    /// corações por um único coração com "xN" (ver comentário em DrawLives).
+    /// </summary>
+    private const int MaxDrawnHearts = 10;
+
     private Sprite _heartSprite;
     private Sprite _infinitySprite;
 
@@ -90,10 +102,18 @@ public class GameScreen : IScreen
     {
         _players = new List<Player>();
 
+        if (IsSoloStoryMode)
+        {
+            _soloSaveData = SoloSaveManager.Load();
+            _soloUpgrades = new SoloUpgrades(_soloSaveData);
+        }
+
         var clown1 = new Character(new Vector2(100f, 120f), Vector2.Zero);
         var trampoline1 = new Character(new Vector2(100f, 400f), Vector2.Zero);
 
-        var player1 = new Player(trampoline1, clown1, _player1Source)
+        int player1Lives = IsSoloStoryMode ? _soloUpgrades.GetStartingLives() : 5;
+
+        var player1 = new Player(trampoline1, clown1, _player1Source, lives: player1Lives)
         {
             TintColor = _player1Color
         };
@@ -216,7 +236,20 @@ public class GameScreen : IScreen
 
     private void SpawnRandomBalloon()
     {
-        var type = Balloon.RollType(_random);
+        BalloonType type;
+        double? timeToLive;
+
+        if (IsSoloStoryMode)
+        {
+            int unlockedColors = _soloUpgrades.GetUnlockedColorCount(Balloon.Types.Length);
+            type = Balloon.RollType(_random, unlockedColors);
+            timeToLive = _soloUpgrades.ApplyDurationUpgrade(type.TimeToLive);
+        }
+        else
+        {
+            type = Balloon.RollType(_random);
+            timeToLive = type.TimeToLive;
+        }
 
         Vector2 position = FindFreeSpawnPosition();
 
@@ -226,7 +259,7 @@ public class GameScreen : IScreen
             Width = BalloonSize,
             Height = BalloonSize,
             TintColor = type.TintColor,
-            TimeToLive = type.TimeToLive,
+            TimeToLive = timeToLive,
             WanderVelocity = RollWanderVelocity()
         };
 
@@ -318,6 +351,46 @@ public class GameScreen : IScreen
         {
             CheckCoopGameOver();
         }
+
+        if (IsSoloStoryMode)
+        {
+            CheckSoloRoundEnd();
+        }
+    }
+
+    /// <summary>
+    /// No modo história, assim que o jogador morre de vez (IsAlive vira
+    /// false), converte os pontos daquele round em dinheiro (100:1, só a
+    /// parte positiva — pontos negativos não convertem em dinheiro
+    /// negativo), salva o progresso e manda para a loja (os pontos do
+    /// round em si somem junto com a troca de tela, não precisam ser
+    /// zerados manualmente). Usa _soloRoundEnded para isso só acontecer
+    /// uma vez por round.
+    /// </summary>
+    private bool _soloRoundEnded;
+
+    private const int PointsToMoneyRate = 100;
+
+    private void CheckSoloRoundEnd()
+    {
+        if (_soloRoundEnded)
+            return;
+
+        var player = _players[0];
+
+        if (player.IsAlive)
+            return;
+
+        _soloRoundEnded = true;
+
+        int pointsEarned = Math.Max(0, player.Score.Points);
+        int moneyEarned = pointsEarned / PointsToMoneyRate;
+
+        _soloSaveData.Money += moneyEarned;
+        SoloSaveManager.Save(_soloSaveData);
+
+        _screenManager.RequestScreenChange(
+            new ShopScreen(_graphicsDevice, _content, _screenManager, _soloSaveData));
     }
 
     private void UpdateBalloonSpawning(GameTime gameTime)
@@ -339,7 +412,9 @@ public class GameScreen : IScreen
                 highestCombo = player.Score.Combo;
         }
 
-        double spawnInterval = _level.GetSpawnInterval(highestCombo);
+        double spawnInterval = IsSoloStoryMode
+            ? _level.GetSpawnInterval(highestCombo, _soloUpgrades)
+            : _level.GetSpawnInterval(highestCombo);
 
         if (_timeSinceLastSpawn >= spawnInterval)
         {
@@ -606,6 +681,35 @@ public class GameScreen : IScreen
                     _spriteBatch,
                     new Vector2(infinityX, heartsY),
                     player.TintColor
+                );
+
+                continue;
+            }
+
+            // Com o upgrade de Vidas do modo história, o jogador pode ter
+            // muito mais que as 5 vidas padrão (até o teto de 30). Acima de
+            // MaxDrawnHearts, desenhar um coração por vida não cabe mais na
+            // tela, então mostramos um único coração com "xN" ao lado.
+            if (player.Lives > MaxDrawnHearts)
+            {
+                float heartX = alignRight
+                    ? _graphicsDevice.Viewport.Width - HeartSize - 8
+                    : 8;
+
+                _heartSprite.DrawTinted(_spriteBatch, new Vector2(heartX, heartsY), player.TintColor);
+
+                string countText = $"x{player.Lives}";
+                Vector2 countSize = _textFont.MeasureString(countText);
+
+                float countX = alignRight
+                    ? heartX - countSize.X - 4
+                    : heartX + HeartSize + 4;
+
+                _spriteBatch.DrawString(
+                    _textFont,
+                    countText,
+                    new Vector2(countX, heartsY - (countSize.Y - HeartSize) / 2f),
+                    Color.White
                 );
 
                 continue;

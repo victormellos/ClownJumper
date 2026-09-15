@@ -71,10 +71,33 @@ public class MainMenu : IScreen
             "ESCOLHA O MODO SOLO",
             new[]
             {
-                new ChoiceOption("Normal", () =>
-                    new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Solo)),
+                new ChoiceOption("Historia", BuildStoryModeSelectScreen),
                 new ChoiceOption("Treinamento", () =>
                     new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Training)),
+            });
+    }
+
+    /// <summary>
+    /// Submenu do modo história (Solo com economia/upgrades): só aqui faz
+    /// sentido "Novo Jogo" (reseta o save) e "Continuar" (usa o save que já
+    /// existir, criando um novo automaticamente se ainda não houver).
+    /// </summary>
+    private IScreen BuildStoryModeSelectScreen()
+    {
+        return new ChoiceScreen(
+            _graphicsDevice,
+            _content,
+            _screenManager,
+            "MODO HISTORIA",
+            new[]
+            {
+                new ChoiceOption("Novo Jogo", () =>
+                {
+                    SoloSaveManager.CreateAndSaveNew();
+                    return new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Solo);
+                }),
+                new ChoiceOption("Continuar", () =>
+                    new GameScreen(_graphicsDevice, _content, _screenManager, GameMode.Solo)),
             });
     }
 

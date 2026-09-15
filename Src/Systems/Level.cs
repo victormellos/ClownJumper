@@ -15,7 +15,12 @@ public class Level
     private const int PopsPerLevel = 10;
     private const double IntervalReductionPerLevel = 0.10; // 10% por nível
     private const double InitialSpawnInterval = 1.2; // segundos
-    private const double MinSpawnInterval = 0.2; // segundos
+
+    /// <summary>
+    /// Piso mínimo de intervalo entre spawns, exposto para que o upgrade
+    /// de Quantidade (SoloUpgrades) nunca reduza o intervalo abaixo dele.
+    /// </summary>
+    public const double MinSpawnInterval = 0.2; // segundos
 
     private const double IntervalReductionPerCombo = 0.01;
 
@@ -55,6 +60,16 @@ public class Level
         double interval = SpawnInterval * comboMultiplier;
 
         return Math.Max(MinSpawnInterval, interval);
+    }
+
+    /// <summary>
+    /// Igual a GetSpawnInterval, mas aplicando também o upgrade de
+    /// Quantidade do modo história por cima do combo (usado pelo Solo).
+    /// </summary>
+    public double GetSpawnInterval(int combo, SoloUpgrades upgrades)
+    {
+        double interval = GetSpawnInterval(combo);
+        return upgrades.ApplySpawnIntervalUpgrade(interval, MinSpawnInterval);
     }
 
     private void AdvanceLevel()
